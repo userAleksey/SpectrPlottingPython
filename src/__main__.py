@@ -65,10 +65,6 @@ if day_of_exp == '21_06 Led':
             Led[file] = np.loadtxt(join(dir,file), skiprows=17,usecols = 1, comments='>')
 
 dir_f0 = join(dir, dir_f0_name)
-#if not day_of_exp == '21_06 Led':
-#    for file in listdir(dir_f0):
-#        if file.endswith(".txt"):
-#            f0_names.append(join(dir_f0,file))
 
 wl = np.loadtxt(join(dir_f0,listdir(dir_f0)[1]), skiprows=17,usecols = 0, comments='>')
 
@@ -101,38 +97,65 @@ if tos == 'MFO'or tos == 'TCM':
                         else:
                             test2 = np.vstack((test2,tmpVar2))
                         dict_for_dyn[dir] = test2
-        fData1[dir] = test[0:4]
+        fData1[dir] = test
         
 res_dir = join('..','results',str(datetime.date.today()),day_of_exp)
 sna = join(res_dir,tos)
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
+
+
+fData0 = np.array([])
+for itm0 in listdir(dir_f0):
+    if itm0.endswith(".txt"):
+        tmpVar0 = np.loadtxt(join(dir_f0,itm0), skiprows=17,usecols = 1, comments='>')
+        if not fData0.any():
+            fData0 = tmpVar0
+        else:
+            fData0 = np.vstack((fData0,tmpVar0))
+
+f1_Data0 = []
+nf1Data0 = []
+Inf1D0 = []
+for itm0 in fData0:
+    itm0[bad_peak_indx] = np.linspace(itm0[bad_peak_indx][0:1],itm0[bad_peak_indx][-2:-1],np.count_nonzero(bad_peak_indx))
+    itm0[bad_peak_indx] = np.random.normal(itm0[bad_peak_indx],50)
+    f1_Data0.append(itm0)
+    nf1Data0.append(itm0/max(itm0[norm_peak_indx]))
+    Inf1D0.append(np.trapz(itm0[flu_indx],wl[flu_indx])/max(itm0[norm_peak_indx]))
+
+mnf1Data0 = np.mean(nf1Data0, axis = 0, dtype=np.float64)
+
+
+
+f1Data1 = {}
+nf1Data1 = {}
+Inf1D1 = {}
+for itm1 in fData1:
+    tmpVar = []
+    tmpVar2 = []
+    tmpVar3 = []
+    for itm2 in fData1[itm1]:
+        itm2[bad_peak_indx] = np.linspace(itm2[bad_peak_indx][0:1],itm2[bad_peak_indx][-2:-1],np.count_nonzero(bad_peak_indx))
+        itm2[bad_peak_indx] = np.random.normal(itm2[bad_peak_indx],50)
+        tmpVar.append(itm2)
+        tmpVar2.append(itm2/max(itm2[norm_peak_indx]))
+        tmpVar3.append(np.trapz(itm2[flu_indx],wl[flu_indx])/max(itm2[norm_peak_indx]))
+    f1Data1[itm1] = tmpVar
+    nf1Data1[itm1] = tmpVar2
+    Inf1D1[itm1] = tmpVar3
     
-if not day_of_exp == '21_06 Led':
-    tmpVar = np.loadtxt(f0_names[0], skiprows=17,usecols = 1, comments='>')
-
-fData0 = np.zeros((len(tmpVar),len(f0_names)))
-fIngl = np.zeros((1,len(f0_names)))
-i = 0
-for itm in f0_names:
-    fData0[:,i] = np.loadtxt(itm, skiprows=17,usecols = 1,comments='>')
-    fData0[:,i][bad_peak_indx] = np.random.normal(np.linspace(fData0[:,i][bad_peak_indx][0:1].item(),fData0[:,i][bad_peak_indx][-2:-1].item(),np.count_nonzero(bad_peak_indx)),50)
-    fIngl[:,i] = np.trapz(fData0[flu_indx,i],wl[flu_indx])/max(fData0[norm_peak_indx,i])
-#    if i== 0:
- #       break
-    i+=1
-
-fData0_m = np.mean(fData0, axis = 1, dtype=np.float64)
-
-fData1_mn = {}
-
-for itm in fData1_m:
-    fData1_mn[itm] = fData1_m[itm]/max(fData1_m[itm][norm_peak_indx])
     
+mnf1Data1 = {}
+for itm in nf1Data1:
+    mnf1Data1[itm] = np.mean(nf1Data1[itm], axis=0,dtype=np.float64)
+
+
     
+switchon = False
 #-----------fault_0_05--------------------!!!----------------------------------
-if tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
+if switchon == True and tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
     max_vls = {}
     edt_fData1_m  = {}
     edt_fData1_m = fData1_m
@@ -156,10 +179,9 @@ if tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
         
 #------------------------------!!!--------------------------------------
 
-fData0_mn = fData0_m/max(fData0_m[norm_peak_indx])
 
-fData_plot = fData1_mn
-fData_plot[dir_f0_name] = fData0_mn
+fData_plot = mnf1Data1
+fData_plot[dir_f0_name] = mnf1Data0
 
 #fData_plot = Led
     
