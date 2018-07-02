@@ -70,7 +70,7 @@ dir_f0 = join(dir, dir_f0_name)
 #        if file.endswith(".txt"):
 #            f0_names.append(join(dir_f0,file))
 
-wl = np.loadtxt(listdir(dir_f0)[0], skiprows=17,usecols = 0, comments='>')
+wl = np.loadtxt(join(dir_f0,listdir(dir_f0)[1]), skiprows=17,usecols = 0, comments='>')
 
 norm_peak_indx = (wl>750)&(wl<850)
 flu_indx = (wl>300)&(wl<600)
