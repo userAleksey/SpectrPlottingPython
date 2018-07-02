@@ -14,22 +14,20 @@ from matplotlib import style
 import datetime
 #style.use('ggplot')
 
-do_save = 1
+do_save = 0
 rad_type = 'Femto'
 tos = 'TCM'
-day_of_exp = '19_6 Oil Convert'
+day_of_exp = '20_06 Oil Convert'
 dir_f0_name = 'Sea1'
 
 f0_names = []
-f1_names = []
+# f1_names = []
 
 font = {'family' : 'normal',
         'weight' : 'bold',
-        'size'   : 24}
+        'size'   : 22}
 
 matplotlib.rc('font', **font)
-
-plt.rcParams["axes.labelweight"] = "bold"
 
 if __name__ == '__main__':
     dir = join('..','data',day_of_exp)
@@ -45,7 +43,7 @@ try:
 except OSError:
     pass
 
-kalib_values = np.ones(2068)
+#kalib_values = np.ones(2068)
 #----------------------------
     
 if day_of_exp == '19_6 Oil Convert':  
@@ -54,10 +52,10 @@ if day_of_exp == '19_6 Oil Convert':
         if file.endswith(".txt"):
             KR_Film[file] = np.loadtxt(join(dir,'KR Film',file), skiprows=17,usecols = 1, comments='>')
         
-        KR_Film_nd = {}
-        for file in listdir(join(dir,'KR Film next day')):
-            if file.endswith(".txt"):
-                KR_Film_nd[file] = np.loadtxt(join(dir,'KR Film next day',file), skiprows=17,usecols = 1, comments='>')
+    KR_Film_nd = {}
+    for file in listdir(join(dir,'KR Film next day')):
+        if file.endswith(".txt"):
+            KR_Film_nd[file] = np.loadtxt(join(dir,'KR Film next day',file), skiprows=17,usecols = 1, comments='>')
 
 if day_of_exp == '21_06 Led':
     Led = {}
@@ -67,13 +65,12 @@ if day_of_exp == '21_06 Led':
             Led[file] = np.loadtxt(join(dir,file), skiprows=17,usecols = 1, comments='>')
 
 dir_f0 = join(dir, dir_f0_name)
-if not day_of_exp == '21_06 Led':
-    for file in listdir(dir_f0):
-        if file.endswith(".txt"):
-            f0_names.append(join(dir_f0,file))
+#if not day_of_exp == '21_06 Led':
+#    for file in listdir(dir_f0):
+#        if file.endswith(".txt"):
+#            f0_names.append(join(dir_f0,file))
 
-if not day_of_exp == '21_06 Led':
-    wl = np.loadtxt(f0_names[0], skiprows=17,usecols = 0, comments='>')
+wl = np.loadtxt(listdir(dir_f0)[0], skiprows=17,usecols = 0, comments='>')
 
 norm_peak_indx = (wl>750)&(wl<850)
 flu_indx = (wl>300)&(wl<600)
@@ -81,58 +78,37 @@ bad_peak_indx = (wl>390)&(wl<405)
 
 if tos == 'MFO'or tos == 'TCM':
     conc = np.array([0.05,0.1,0.2,0.5,1.0])
-    if tos == 'TCM':
-        conc = np.array([0.001,0.002,0.004,0.01,0.02])
-    if tos == 'MFO':
-        conc = np.array([0.0005,0.001,0.002,0.005,0.01])
+    conc = np.array([0.001,0.002,0.004,0.01,0.02])
     dir_f1 = join(dir,tos)
-    fData1_m = {}
-    stds_v = {}
-    stds_v2 = {}
+    fData1 = {}
     dict_for_dyn = {}
     for dir in listdir(dir_f1):
         test = np.array([])
         test2 = np.array([])
-        stkdiVal = []
-        maxis_n = []
-        for file in listdir(join(dir_f1,dir)):
-            if file.endswith(".txt"):
-                tmpVar = np.loadtxt(join(dir_f1,dir,file), skiprows=17,usecols = 1, comments='>')
-                tmpVar[bad_peak_indx] = np.random.normal(np.linspace(tmpVar[bad_peak_indx][0:1].item(),tmpVar[bad_peak_indx][-2:-1].item(),np.count_nonzero(bad_peak_indx)),50)
-                tmpVar = tmpVar*kalib_values
-                iVal = np.trapz(tmpVar[flu_indx],wl[flu_indx])
-                max_n = max(tmpVar[norm_peak_indx])
+        for itm in listdir(join(dir_f1,dir)):
+            if itm.endswith(".txt"):
+                tmpVar = np.loadtxt(join(dir_f1,dir,itm), skiprows=17,usecols = 1, comments='>')
                 if not test.any():
                     test = tmpVar
                 else:
                     test = np.vstack((test,tmpVar))
-                stkdiVal.append(iVal)
-                maxis_n.append(max_n)
-            if  isdir(join(dir_f1,dir,file)):
-                for file2 in listdir(join(dir_f1,dir,file)):
-                    if file2.endswith(".txt"):
-                        tmpVar2 = np.loadtxt(join(dir_f1,dir,file,file2), skiprows=17,usecols = 1, comments='>')
-                        tmpVar2[bad_peak_indx] = np.random.normal(np.linspace(tmpVar2[bad_peak_indx][0:1].item(),tmpVar2[bad_peak_indx][-2:-1].item(),np.count_nonzero(bad_peak_indx)),50)
+            if  isdir(join(dir_f1,dir,itm)):
+                for file in listdir(join(dir_f1,dir,itm)):
+                    if file.endswith(".txt"):
+                        tmpVar2 = np.loadtxt(join(dir_f1,dir,itm,file), skiprows=17,usecols = 1, comments='>')
                         if not test2.any():
                             test2 = tmpVar2
                         else:
                             test2 = np.vstack((test2,tmpVar2))
-                        dict_for_dyn[dir] = np.vstack((np.mean(test[0:4],0, dtype=np.float64),test2))
-        fData1_m[dir] = np.mean(test[0:4],0, dtype=np.float64) 
-        stds_v[dir] = np.std(stkdiVal[0:4])
-        test_n = []
-        for itm in list(range(4)):
-            if dir == "0_05" and tos == 'TCM':
-                test_n.append(np.trapz(test[itm][flu_indx]/np.mean(maxis_n[1:]),wl[flu_indx]))
-            else:
-                test_n.append(np.trapz(test[itm][flu_indx]/maxis_n[itm],wl[flu_indx]))
-        stds_v2[dir] = np.std(test_n[0:4])
+                        dict_for_dyn[dir] = test2
+        fData1[dir] = test[0:4]
         
 res_dir = join('..','results',str(datetime.date.today()),day_of_exp)
 sna = join(res_dir,tos)
-    
+
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
+    
 if not day_of_exp == '21_06 Led':
     tmpVar = np.loadtxt(f0_names[0], skiprows=17,usecols = 1, comments='>')
 
@@ -178,8 +154,6 @@ if tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
         mxs_t.append(mean(mxss))
            
         
-    
-
 #------------------------------!!!--------------------------------------
 
 fData0_mn = fData0_m/max(fData0_m[norm_peak_indx])
@@ -194,7 +168,7 @@ fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
 fig.set_tight_layout(True)
 
 for itm in fData_plot:
-    ax1.plot(wl,fData_plot[itm],linewidth = 2.0)
+    ax1.plot(wl,fData_plot[itm])
 
 
 ax1.legend(np.hstack([conc, 'Sea']))
@@ -253,19 +227,16 @@ fig.set_tight_layout(True)
 
 ax1.scatter(conc, f_sn)
 ax1.plot(conc, func1(conc, *popt),'r-')
-ax1.errorbar(conc, f_sn,list(stds_v2.values()),fmt = 'o')
+ax1.errorbar(conc, f_sn,list(stds_v2.values()))
 
 
 
 ax1.set(xlabel = 'Conc, %', 
-       ylabel = r'$ \alpha $, Relative units', 
+       ylabel = 'SN, Relative units', 
        title = rad_type+' '+tos,
-       xlim = [0,conc[-1]+conc[0]],
+       xlim = [0,conc[-1]],
        ylim = 0
        )
-
-ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-ax1.yaxis.major.formatter._useMathText = True
 
 ax1.axvline(LoD, ls = '--', color = 'g')
 ax1.text(LoD,250,'LOD', color = 'g')
@@ -336,39 +307,26 @@ if bool(dict_for_dyn):
             else:
                 dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/max(dict_for_dyn[conc][t][norm_peak_indx]),wl[flu_indx])-np.trapz(fData0_mn[flu_indx],wl[flu_indx])
         if conc == '0_05' and tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
-            ax1.plot([0,10,20,30,60], dict_for_dyn[conc][0:-1,0],'.-', markersize=15, alpha = 0)
+            ax1.plot([5,10,20,30,60], dict_for_dyn[conc][0:-1,0],'.-', markersize=15, alpha = 0)
             
         else:
-            ax1.plot([-5,5,10,20,30,60], np.hstack((tcm_1st_day[itm],dict_for_dyn[conc][0:-1,0])),'.-', markersize=15)  
-            ax1.errorbar([-5,5,10,20,30,60], np.hstack((tcm_1st_day[itm],dict_for_dyn[conc][0:-1,0])),stds_v2[conc],barsabove = True, c = 'b')
+            ax1.plot([1,5,10,20,30,60], np.hstack((tcm_1st_day[itm],dict_for_dyn[conc][0:-1,0])),'.-', markersize=15)  
+            ax1.errorbar([1,5,10,20,30,60], np.hstack((tcm_1st_day[itm],dict_for_dyn[conc][0:-1,0])),stds_v2[conc],barsabove = True, c = 'b')
             
         itm+=1
    
     
     for itm in [0,1,2,3,4]:
-        ax1.errorbar(-5, tcm_1st_day[itm],list(stds_tcm_1st_day.values())[itm],barsabove = True, c = 'r')
+        ax1.errorbar(1, tcm_1st_day[itm],list(stds_tcm_1st_day.values())[itm],barsabove = True, c = 'r')
 
-    ax1.axvline(0, ls = '--', color = 'k')
-   
-
-    ax1.text(ax1.get_xlim()[0]/1.45,ax1.get_ylim()[1]/1.05,'1st day',fontsize = 22)
-
-    ax1.text(ax1.get_xlim()[1]/150,ax1.get_ylim()[1]/1.05,'3rd day',fontsize = 22)
-
-    ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-    ax1.yaxis.major.formatter._useMathText = True
 
     conc = np.array([0.001,0.002,0.004,0.01,0.02])
-    if tos == 'TCM':
-        conc = np.array([0.001,0.002,0.004,0.01,0.02])
-    if tos == 'MFO':
-        conc = np.array([0.0005,0.001,0.002,0.005,0.01])
     ax1.legend(conc)
     
     ax1.set(xlabel = 't, s', 
-           ylabel = r'$ \alpha $, Relative units', 
+           ylabel = 'I, Relative units', 
            title = rad_type+' '+tos,
-           xlim = -6,
+           xlim = 0,
            ylim = 0     
            )
     if do_save == 1:
