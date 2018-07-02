@@ -16,7 +16,7 @@ import datetime
 
 do_save = 0
 rad_type = 'Femto'
-tos = 'TCM'
+tos = 'MFO'
 day_of_exp = '20_06 Oil Convert'
 dir_f0_name = 'Sea1'
 
@@ -207,8 +207,8 @@ if do_save == 1:
 plt.show()
 
 f_sn = {}
-for key in fData1_mn:
-    f_sn[key] = np.trapz(fData1_mn[key][flu_indx],wl[flu_indx])-np.trapz(fData0_mn[flu_indx],wl[flu_indx])
+for key in mnf1Data1:
+    f_sn[key] = np.trapz(mnf1Data1[key][flu_indx],wl[flu_indx])-np.trapz(mnf1Data0[flu_indx],wl[flu_indx])
 del f_sn[dir_f0_name]
 
 f_sn = list(f_sn.values())
@@ -239,17 +239,20 @@ def coefficient_of_determination(ys_orig,ys_line):
     return 1 - (squared_error_regr/squared_error_y_mean)
 
 #np.trapz(fData0_mn[flu_indx],wl[flu_indx])
-LoD = 3.0*np.std(fIngl[0:4])/popt[0]
+LoD = 3.0*np.std(Inf1D0)/popt[0]
 
 r_square = coefficient_of_determination(np.array(f_sn),np.array(func1(conc, *popt)))
+
+stds_d1 = []
+for itm in Inf1D1: 
+    stds_d1.append(np.std(Inf1D1[itm]))
 
 fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
 fig.set_tight_layout(True)
 
-
 ax1.scatter(conc, f_sn)
 ax1.plot(conc, func1(conc, *popt),'r-')
-ax1.errorbar(conc, f_sn,list(stds_v2.values()))
+ax1.errorbar(conc, f_sn,stds_d1)
 
 
 
@@ -327,7 +330,7 @@ if bool(dict_for_dyn):
                 
                 dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/mxs_t[t],wl[flu_indx])-np.trapz(fData0_mn[flu_indx],wl[flu_indx])
             else:
-                dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/max(dict_for_dyn[conc][t][norm_peak_indx]),wl[flu_indx])-np.trapz(fData0_mn[flu_indx],wl[flu_indx])
+                dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/max(dict_for_dyn[conc][t][norm_peak_indx]),wl[flu_indx])-np.trapz(mnf1Data0[flu_indx],wl[flu_indx])
         if conc == '0_05' and tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
             ax1.plot([5,10,20,30,60], dict_for_dyn[conc][0:-1,0],'.-', markersize=15, alpha = 0)
             
