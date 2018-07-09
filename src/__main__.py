@@ -238,7 +238,6 @@ def coefficient_of_determination(ys_orig,ys_line):
     squared_error_y_mean = squared_error(ys_orig, y_mean_line)
     return 1 - (squared_error_regr/squared_error_y_mean)
 
-#np.trapz(fData0_mn[flu_indx],wl[flu_indx])
 LoD = 3.0*np.std(Inf1D0)/popt[0]
 
 r_square = coefficient_of_determination(np.array(f_sn),np.array(func1(conc, *popt)))
@@ -274,6 +273,9 @@ if do_save == 1:
 
 
 plt.show()
+
+for itm in dict_for_conc:
+    
 
 if bool(dict_for_dyn):
 
@@ -316,9 +318,6 @@ if bool(dict_for_dyn):
     
     plt.show()
     
-    
-
-    
     fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
     fig.set_tight_layout(True)
     
@@ -326,8 +325,6 @@ if bool(dict_for_dyn):
     for conc in dict_for_dyn:
         for t in [0,1,2,3,4]:
             if conc == '0_05' and tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
-
-                
                 dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/mxs_t[t],wl[flu_indx])-np.trapz(fData0_mn[flu_indx],wl[flu_indx])
             else:
                 dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/max(dict_for_dyn[conc][t][norm_peak_indx]),wl[flu_indx])-np.trapz(mnf1Data0[flu_indx],wl[flu_indx])
