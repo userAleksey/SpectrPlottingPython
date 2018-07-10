@@ -274,8 +274,26 @@ if do_save == 1:
 
 plt.show()
 
-for itm in dict_for_conc:
-    
+
+if bool(dict_for_dyn):
+    f1Dfd = {}
+    nf1Dfd = {}
+    Inf1Dfd = {}
+    for itm1 in dict_for_dyn:
+        tmpVar = []
+        tmpVar2 = []
+        tmpVar3 = []
+        for itm2 in dict_for_dyn[itm1]:
+            itm2[bad_peak_indx] = np.linspace(itm2[bad_peak_indx][0:1],itm2[bad_peak_indx][-2:-1],np.count_nonzero(bad_peak_indx))
+            itm2[bad_peak_indx] = np.random.normal(itm2[bad_peak_indx],50)
+            tmpVar.append(itm2)
+            tmpVar2.append(itm2/max(itm2[norm_peak_indx]))
+            tmpVar3.append(np.trapz(itm2[flu_indx],wl[flu_indx])/max(itm2[norm_peak_indx]))
+        f1Dfd[itm1] = tmpVar
+        nf1Dfd[itm1] = tmpVar2
+        Inf1Dfd[itm1] = tmpVar3
+            
+    dict_for_dyn = nf1Dfd
 
 if bool(dict_for_dyn):
 
