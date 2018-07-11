@@ -74,9 +74,12 @@ norm_peak_indx = (wl>750)&(wl<850)
 flu_indx = (wl>300)&(wl<600)
 bad_peak_indx = (wl>390)&(wl<405)
 
-if tos == 'MFO'or tos == 'TCM':
+if tos == 'MFO'or tos == 'TCM':   
     conc = np.array([0.05,0.1,0.2,0.5,1.0])
-    conc = np.array([0.001,0.002,0.004,0.01,0.02])
+    if tos == 'TCM':
+        conc = np.array([0.001,0.002,0.004,0.01,0.02])
+    if tos == 'MFO':
+        conc = np.array([0.0005,0.001,0.002,0.005,0.01])
     dir_f1 = join(dir,tos)
     fData1 = {}
     dict_for_dyn = {}
