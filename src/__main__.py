@@ -14,8 +14,29 @@ from matplotlib import style
 import datetime
 #style.use('ggplot')
 
+def func_line(x, a, b):
+    return a*x+b
+    
+def func_pow1(x, a, b):
+    return a*x**b   
+    
+def func_pow2(x, a, b, c):
+    return a*x**b+c   
+    
+def func_pow3(x, a, b):
+    return a*x**b+55.5
 
-do_save = 0
+def squared_error(ys_orig,ys_line):
+    return sum((ys_line - ys_orig) * (ys_line - ys_orig))
+        
+def coefficient_of_determination(ys_orig,ys_line):
+    y_mean_line = [mean(ys_orig) for y in ys_orig]
+    squared_error_regr = squared_error(ys_orig, ys_line)
+    squared_error_y_mean = squared_error(ys_orig, y_mean_line)
+    return 1 - (squared_error_regr/squared_error_y_mean)
+
+
+do_save = 1
 rad_type = 'LCD'
 tos = 'disel'
 day_of_exp = '10_07_2018'
@@ -76,7 +97,11 @@ flu_indx = (wl>300)&(wl<600)
 bad_peak_indx = (wl>390)&(wl<405)
 
 if tos == 'disel':
+    norm_peak_indx = (wl>340)&(wl<400)
+    flu_indx = (wl>330)&(wl<400)
+    bad_peak_indx = (wl>500)&(wl<510)
     conc = np.array([0.05,0.1,0.15,0.2,0.4,0.8,1.6,3.2])
+    conc = np.array([15,30,45,60,120,240,480,960])
     dir_f1 = join(dir,tos)
     fData1 = {}
     for itm in listdir(dir_f1):
@@ -129,6 +154,79 @@ for itm0 in listdir(dir_f0):
             fData0 = tmpVar0
         else:
             fData0 = np.vstack((fData0,tmpVar0))
+            
+if tos == 'disel':
+    maxFn = []
+    for itm in fData1:
+        maxFn.append(max(fData1[itm]))
+    maxFn = max(maxFn)
+    fData0 = fData0/maxFn
+    for itm in fData1:
+        fData1[itm] = fData1[itm]/maxFn
+        
+    fData_plot = fData1
+    fData_plot[dir_f0_name] = fData0
+    
+    fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
+    fig.set_tight_layout(True)
+    
+    for itm in fData_plot:
+        ax1.plot(wl,fData_plot[itm])
+    
+    ax1.legend(np.hstack([conc, 'fon']))
+    
+    ax1.set(xlabel = 'Wavelength, nm', 
+           ylabel = 'I, Relative units', 
+           title = rad_type+' '+tos,
+           xlim = [340,400],
+           ylim = 0
+           )
+    if do_save == 1:
+        fig.savefig(sna+'.jpg',transparent=False,dpi=300,bbox_inches="tight")       
+    
+    plt.show()
+    
+    f_sn = {}
+    for key in fData1:
+        f_sn[key] = np.trapz(fData1[key][flu_indx],wl[flu_indx])-np.trapz(fData0[flu_indx],wl[flu_indx])
+    del f_sn[dir_f0_name]
+    
+    f_sn = list(f_sn.values())
+            
+    func1 = func_pow3
+    
+    popt, pcov = curve_fit(func1, conc, f_sn, maxfev = 2000)
+    
+    r_square = coefficient_of_determination(np.array(f_sn),np.array(func1(conc, *popt)))
+    
+    fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
+    fig.set_tight_layout(True)
+    
+    ax1.scatter(conc, f_sn)
+    ax1.plot(np.linspace(0, 960, 100), func1(np.linspace(0, 960, 100), *popt),'r-')
+    ax1.set(xlabel = 'Thickness', 
+           ylabel = 'SN, Relative units', 
+           title = rad_type+' '+tos,
+           xlim = [0,conc[-1]],
+           ylim = 0
+           )
+    
+    ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    ax1.yaxis.major.formatter._useMathText = True
+    
+
+
+    ax1.text(ax1.get_xlim()[1]/2,ax1.get_ylim()[1]/1.5,'$R^2$ = '+"{:.4f}".format(r_square))
+    
+    if do_save == 1:
+        fig.savefig(sna+'_LOD'+'.jpg',transparent=False,dpi=300,bbox_inches="tight")       
+    
+    
+    
+    plt.show()
+    
+#-------End of disel---------------------------------
+
 
 f1_Data0 = []
 nf1Data0 = []
@@ -228,30 +326,11 @@ del f_sn[dir_f0_name]
 
 f_sn = list(f_sn.values())
 
-def func_line(x, a, b):
-    return a*x+b
-    
-def func_pow1(x, a, b):
-    return a*x**b   
-    
-def func_pow2(x, a, b, c):
-    return a*x**b+c   
-    
-def func_pow3(x, a, b):
-    return a*x**b+0.5
+
     
 func1 = func_line
 
 popt, pcov = curve_fit(func1, conc, f_sn)
-
-def squared_error(ys_orig,ys_line):
-    return sum((ys_line - ys_orig) * (ys_line - ys_orig))
-    
-def coefficient_of_determination(ys_orig,ys_line):
-    y_mean_line = [mean(ys_orig) for y in ys_orig]
-    squared_error_regr = squared_error(ys_orig, ys_line)
-    squared_error_y_mean = squared_error(ys_orig, y_mean_line)
-    return 1 - (squared_error_regr/squared_error_y_mean)
 
 LoD = 3.0*np.std(Inf1D0)/popt[0]
 
