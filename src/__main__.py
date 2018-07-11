@@ -262,6 +262,9 @@ ax1.set(xlabel = 'Conc, %',
        ylim = 0
        )
 
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+ax1.yaxis.major.formatter._useMathText = True
+
 ax1.axvline(LoD, ls = '--', color = 'g')
 ax1.text(LoD,250,'LOD', color = 'g')
 ax1.text(LoD,0,"{:.4f}".format(LoD), color = 'g')
@@ -354,6 +357,10 @@ if bool(nf1Dfd):
            xlim = 0,
            ylim = 0     
            )
+    
+    ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+    ax1.yaxis.major.formatter._useMathText = True
+    
     if do_save == 1:
         fig.savefig(sna+'dyn.jpg',transparent=False,dpi=300,bbox_inches="tight")       
     
