@@ -14,11 +14,12 @@ from matplotlib import style
 import datetime
 #style.use('ggplot')
 
+
 do_save = 0
-rad_type = 'Femto'
-tos = 'MFO'
-day_of_exp = '20_06 Oil Convert'
-dir_f0_name = 'Sea1'
+rad_type = 'LCD'
+tos = 'disel'
+day_of_exp = '10_07_2018'
+dir_f0_name = 'fon'
 
 f0_names = []
 # f1_names = []
@@ -68,11 +69,20 @@ if day_of_exp == '21_06 Led':
 
 dir_f0 = join(dir, dir_f0_name)
 
-wl = np.loadtxt(join(dir_f0,listdir(dir_f0)[1]), skiprows=17,usecols = 0, comments='>')
+wl = np.loadtxt(join(dir_f0,listdir(dir_f0)[0]), skiprows=17,usecols = 0, comments='>')
 
 norm_peak_indx = (wl>750)&(wl<850)
 flu_indx = (wl>300)&(wl<600)
 bad_peak_indx = (wl>390)&(wl<405)
+
+if tos == 'disel':
+    conc = np.array([0.05,0.1,0.15,0.2,0.4,0.8,1.6,3.2])
+    dir_f1 = join(dir,tos)
+    fData1 = {}
+    for itm in listdir(dir_f1):
+        if itm.endswith(".txt"):
+            fData1[itm] = np.loadtxt(join(dir_f1,itm), skiprows=17,usecols = 1, comments='>')
+    
 
 if tos == 'MFO'or tos == 'TCM':   
     conc = np.array([0.05,0.1,0.2,0.5,1.0])
