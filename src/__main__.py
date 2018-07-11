@@ -295,7 +295,7 @@ if bool(dict_for_dyn):
             
     dict_for_dyn = nf1Dfd
 
-if bool(dict_for_dyn):
+if bool(nf1Dfd):
 
     dyn_conc = '1'
     
@@ -315,7 +315,7 @@ if bool(dict_for_dyn):
     verts = []
     zs = [0.0, 1.0, 2.0, 3.0, 4.0]
     for z in zs:
-        ys = dict_for_dyn[dyn_conc][int(z)][1:1500]
+        ys = nf1Dfd[dyn_conc][int(z)][1:1500]
         ys[0], ys[-1] = 0, 0
         verts.append(list(zip(xs, ys)))
     
@@ -340,26 +340,11 @@ if bool(dict_for_dyn):
     fig.set_tight_layout(True)
     
     itm = 0
-    for conc in dict_for_dyn:
+    for conc in nf1Dfd:
         for t in [0,1,2,3,4]:
-            if conc == '0_05' and tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
-                dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/mxs_t[t],wl[flu_indx])-np.trapz(fData0_mn[flu_indx],wl[flu_indx])
-            else:
-                dict_for_dyn[conc][t] = np.trapz(dict_for_dyn[conc][t][flu_indx]/max(dict_for_dyn[conc][t][norm_peak_indx]),wl[flu_indx])-np.trapz(mnf1Data0[flu_indx],wl[flu_indx])
-        if conc == '0_05' and tos == 'TCM' and day_of_exp == '20_06 Oil Convert':
-            ax1.plot([5,10,20,30,60], dict_for_dyn[conc][0:-1,0],'.-', markersize=15, alpha = 0)
-            
-        else:
-            ax1.plot([1,5,10,20,30,60], np.hstack((tcm_1st_day[itm],dict_for_dyn[conc][0:-1,0])),'.-', markersize=15)  
-            ax1.errorbar([1,5,10,20,30,60], np.hstack((tcm_1st_day[itm],dict_for_dyn[conc][0:-1,0])),stds_v2[conc],barsabove = True, c = 'b')
-            
+            nf1Dfd[conc][t] = np.trapz(nf1Dfd[conc][t][flu_indx],wl[flu_indx])-np.trapz(mnf1Data0[flu_indx],wl[flu_indx])
+        ax1.plot([5,10,20,30,60], nf1Dfd[conc],'.-', markersize=15)
         itm+=1
-   
-    
-    for itm in [0,1,2,3,4]:
-        ax1.errorbar(1, tcm_1st_day[itm],list(stds_tcm_1st_day.values())[itm],barsabove = True, c = 'r')
-
-
     conc = np.array([0.001,0.002,0.004,0.01,0.02])
     ax1.legend(conc)
     
