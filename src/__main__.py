@@ -29,6 +29,8 @@ font = {'family' : 'normal',
 
 matplotlib.rc('font', **font)
 
+plt.rcParams["axes.labelweight"] = "bold"
+
 if __name__ == '__main__':
     dir = join('..','data',day_of_exp)
 else:
