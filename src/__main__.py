@@ -25,7 +25,7 @@ f0_names = []
 
 font = {'family' : 'normal',
         'weight' : 'bold',
-        'size'   : 22}
+        'size'   : 24}
 
 matplotlib.rc('font', **font)
 
