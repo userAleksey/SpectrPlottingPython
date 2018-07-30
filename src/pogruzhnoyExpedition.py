@@ -14,7 +14,7 @@ from matplotlib import style
 import datetime
 #style.use('ggplot')
 
-do_save = 0
+do_save = 1
 rad_type = '527 nm'
 tos = 'mwater'
 day_of_exp = 'pogruzhnoyExp2018'
@@ -40,8 +40,11 @@ if tos == 'mwater':
     fData1 = {}
     wl = np.loadtxt(join(dir_f1,listdir(dir_f1)[0]),usecols = 0, comments='>')
     for itm in listdir(dir_f1):
-        if itm.endswith("zond.txt"):
+        if itm.endswith("2zond.txt"):
             zondVals = np.loadtxt(join(dir_f1,itm), skiprows=1)
+            continue
+        if itm.endswith("1zond.txt"):
+            
             continue
         if itm.endswith("callib_coefs_part.txt"):
             calibVals = np.loadtxt(join(dir_f1,itm),usecols = 0, comments='>')
@@ -82,29 +85,32 @@ ax1.set(xlabel = 'Wavelength, nm',
        ylim = [0,1.2]
        )
 if do_save == 1:
-    fig.savefig(sna+'.jpg',transparent=False,dpi=300,bbox_inches="tight")       
+    fig.savefig(sna+'2.jpg',transparent=False,dpi=300,bbox_inches="tight")       
 
 plt.show()
 
-fData_plot = zondVals
 
+fData_plot = zondVals
 
 fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
 fig.set_tight_layout(True)
 
-for itm in fData_plot[0][1:]:
-    ax1.plot(fData_plot[:][0],fData_plot[itm])
+i = 0
+for itm in [1,2,3]:
+    ax1.plot(fData_plot[:,itm],fData_plot[:,0])
+    i=+1
 
-ax1.legend(list(fData_plot.keys()))
+ax1.legend(['Temperature','Fluorescence','CDOM'])
 
-ax1.set(xlabel = 'Wavelength, nm', 
-       ylabel = 'I, Relative units', 
-       title = rad_type+' '+tos,
-       xlim = [565,790],
-       ylim = [0,1.2]
+ax1.set(xlabel = ' units', 
+       ylabel = 'Depth, m', 
+       title = 'zond',
+       xlim = [0,17],
+       ylim = [17,0]
+       
        )
 if do_save == 1:
-    fig.savefig(sna+'.jpg',transparent=False,dpi=300,bbox_inches="tight")       
+    fig.savefig(sna+'2zond.jpg',transparent=False,dpi=300,bbox_inches="tight")       
 
 plt.show()
     
