@@ -22,9 +22,9 @@ def natural_sort(l):
     return sorted(l, key = alphanum_key)
 
 do_save = 1
-rad_type = '266 nm'
-day_of_exp = '12_10_2018'
-tos = 'hfo'
+rad_type = ''
+day_of_exp = '15_10_2018'
+tos = 'undentif_led'
 
 font = {'family' : 'normal',
         'weight' : 'bold',
@@ -44,10 +44,18 @@ dir = join('..','data',day_of_exp,tos)
 
 dir_d1 = dir
 Data1 = {}
-wl = np.loadtxt(join(dir_d1,listdir(dir_d1)[0]),usecols = 0, comments='>')
-for itm in listdir(dir_d1):
+#wl = np.loadtxt(join(dir_d1,listdir(dir_d1)[0]),skiprows = 14, usecols = 0, comments='>')
+
+wl= np.loadtxt(join(dir_d1,listdir(dir_d1)[0]), dtype=np.str, usecols = 0, skiprows=14)
+wl = np.char.replace(wl, ',', '.').astype(np.float64)
+        #wl = np.char.replace(wl, '\'', '')
+        #wl = np.char.replace(wl, 'b', '')
+
+for itm in natural_sort(listdir(dir_d1)):
     if itm.endswith(".txt"):
-        Data1[itm] = np.loadtxt(join(dir_d1,itm),usecols = 1, comments='>')
+        #Data1[itm] = np.loadtxt(join(dir_d1,itm), skiprows=14,usecols = 1, comments='>')
+        Data1[itm] = np.loadtxt(join(dir_d1,itm), dtype=np.str,skiprows=14,usecols = 1, comments='>')
+        Data1[itm] = np.char.replace(Data1[itm], ',', '.').astype(np.float64)
     
 res_dir = join('..','results',str(datetime.date.today()),day_of_exp)
 sna = join(res_dir,tos)
@@ -66,7 +74,7 @@ ax1.legend(list(Data1.keys()),loc = 0)
 ax1.set(xlabel = 'Wavelength, nm', 
        ylabel = 'I, units', 
        title = rad_type+' '+tos,
-       xlim = [250,500],
+       xlim = [250,600],
  #      ylim = [0,]
        )    
        
