@@ -16,18 +16,21 @@ import datetime
 
 import re
 
+from scipy import signal
+
 def natural_sort(l): 
     convert = lambda text: int(text) if text.isdigit() else text.lower() 
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(l, key = alphanum_key)
 
-do_save = 0
+do_save = 1
 rad_type = ''
 day_of_exp = '28_11_2018'
-tos = 'led'
+tos = 'lamp'
 
 norm_max = 1
-smooth = 0
+smooth = 1
+backgroundless = 1
 
 font = {'family' : 'normal',
         'weight' : 'bold',
@@ -68,14 +71,18 @@ if not isdir(res_dir):
 fig, (ax1) = plt.subplots(1,1,figsize=(18,10))
 fig.set_tight_layout(True)
 
+if smooth == 1:
+    for itm in Data1:
+        Data1[itm] = signal.savgol_filter(Data1[itm], 11, 1)
+        
+
+if backgroundless == 1:
+    for itm in Data1:
+        Data1[itm] = Data1[itm] - np.mean(Data1[itm][100:200])
+
 if norm_max == 1:
     for itm in Data1:
         Data1[itm] = Data1[itm]/max(Data1[itm])
-
-
-if smooth == 1:
-    for itm in Data1:
-        Data1[itm] = savitzky_golay(Data1[itm], 51, 3)
 
 
 
@@ -88,7 +95,7 @@ ax1.set(xlabel = 'Wavelength, nm',
        ylabel = 'I, units', 
        title = rad_type+' '+tos,
        xlim = [250,1000],
- #      ylim = [0,]
+       ylim = [0,1]
        )    
        
 if do_save == 1:
