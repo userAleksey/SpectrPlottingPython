@@ -16,16 +16,20 @@ def load_data (datapath):
             Data[itm] = np.char.replace(Data[itm], ',', '.').astype(np.float64)
     return Data
 
-# def average (Data):
-#     dictlist = []
-#     for itm in Data:
-#         dictlist.append(Data[itm])
-#     Data[tos] = np.mean(dictlist, axis=0)
-#
-# def norm_max (Data):
-#     for itm in Data:
-#         Data[itm] = Data[itm] / max(Data[itm])
-#
+def average (data):
+    dictlist = []
+    Data = {}
+    for itm in data :
+        dictlist.append(data[itm])
+    Data[itm] = np.mean(dictlist, axis=0)
+    return Data
+
+def norm_max (data):
+    Data = {}
+    for itm in data:
+        Data[itm] = data[itm] / max(data[itm])
+    return Data
+
 # def smooth (Data):
 #     for itm in Data:
 #         Data[itm] = signal.savgol_filter(Data[itm], 11, 1)

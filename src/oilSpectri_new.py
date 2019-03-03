@@ -24,7 +24,7 @@ do_save = 0
 rad_type = 'sun'
 day_of_exp = '28_02_19'
 
-tos = ['clear2','oil']
+tos = ['clear','clear2','oil','led1','led2']
 
 norm_max = 1
 smooth = 0
@@ -40,7 +40,7 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir, tos)
+sna = join(res_dir, '-'.join(tos))
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
@@ -55,6 +55,12 @@ data = {}
 for itm in tos :
     datapath = join('..', 'data', day_of_exp, itm)
     data[itm] = managedata.load_data(datapath)
+    if average :
+        data[itm] = managedata.average(data[itm])
+    if norm_max :
+        data[itm] = managedata.norm_max(data[itm])
+
+
 
 
 
@@ -65,14 +71,15 @@ fig, (ax1) = plt.subplots(1, 1, figsize=(18, 10))
 fig.set_tight_layout(True)
 
 for itm in data :
-    ax1.plot(wl, data [itm])
+    for itm2 in data[itm] :
+        ax1.plot(wl, data[itm][itm2])
 
 if legend == 1:
     ax1.legend(list(data.keys()), loc=0)
 
 ax1.set(xlabel='Wavelength, nm',
         ylabel='I, units',
-        title=rad_type + ' ' + tos,
+        title=rad_type + ' ',
         xlim=[300, 850],
         #       ylim = [0,1]
         )
