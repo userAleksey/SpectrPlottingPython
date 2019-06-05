@@ -2,6 +2,7 @@ from os import listdir
 import numpy as np
 import re
 from os.path import join
+from PIL import Image
 
 def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
@@ -14,6 +15,10 @@ def load_data (datapath):
         if itm.endswith(".txt"):
             Data[itm] = np.loadtxt(join(datapath, itm), dtype=np.str, skiprows=15, usecols=1, comments='>')
             Data[itm] = np.char.replace(Data[itm], ',', '.').astype(np.float64)
+        if itm.endswith(".tif"):
+            Data[itm] = np.sum(np.array(Image.open(join(datapath, itm))),0)
+            Data[itm] = Data[itm][::-1]
+
     return Data
 
 def average (data):
@@ -37,4 +42,6 @@ def norm_max (data):
 # def backgroundless (Data, first, last):
 #     for itm in Data:
 #         Data[itm] = Data[itm] - np.mean(Data[itm][first:last])
+
+
 
