@@ -16,7 +16,7 @@ def load_data (datapath):
             Data[itm] = np.loadtxt(join(datapath, itm), dtype=np.str, skiprows=15, usecols=1, comments='>')
             Data[itm] = np.char.replace(Data[itm], ',', '.').astype(np.float64)
         if itm.endswith(".tif"):
-            Data[itm] = np.sum(np.array(Image.open(join(datapath, itm))),0)
+            Data[itm] = np.sum(np.array(Image.open(join(datapath, itm)), dtype='float64')/65536.,0)
             Data[itm] = Data[itm][::-1]
 
     return Data
@@ -33,6 +33,12 @@ def norm_max (data):
     Data = {}
     for itm in data:
         Data[itm] = data[itm] / max(data[itm])
+    return Data
+
+def getivals (data, x, idxs):
+    Data = {}
+    for itm in data:
+        Data[itm] = np.trapz(data[itm][idxs[0]:idxs[-1]],x[idxs[0]:idxs[-1]])
     return Data
 
 # def smooth (Data):
