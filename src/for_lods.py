@@ -1,7 +1,7 @@
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from os.path import join, isdir, abspath
+from os.path import join, isdir, abspath, isfile
 from os import makedirs
 from os import listdir
 
@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from sklearn.metrics import r2_score
 # from statistics import mean
 # from matplotlib import style
 import datetime
@@ -45,7 +46,7 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir, '-'.join(day_of_exp))
+sna = join(res_dir,day_of_exp)
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
@@ -55,7 +56,7 @@ for itm in listdir(datapath):
     if itm.endswith(".txt"):
         wl = np.loadtxt(join(datapath, itm ), dtype=np.str, usecols=0, skiprows=17, comments='>')
 wl = np.char.replace(wl, ',', '.').astype(np.float64)
-#wl2 = np.loadtxt("../data/04_06_2019/WaveFl.txt")
+
 #wl = []
 #for i in range(len(wl2)):
 #    if i % 2 == 0:
@@ -67,7 +68,7 @@ if getivals:
 data = {}
 
 for itm in listdir(datapath):
-    if itm.endswith(".txt"):
+    if not isdir(join(datapath,itm)):
         continue
     data[itm] = managedata.load_data(join('..', 'data', day_of_exp, itm))
     if getivals:
@@ -98,26 +99,49 @@ ax1.set(xlabel='Wavelength, nm',
 
 if do_save == 1:
     fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
+#----- for lods
+std = np.std(list(ivals['Sea Water'].values()))
 
-test_std = np.std(list(ivals['Sea Water'].values()))
-
-def func ( x, a, b ) :
+def func(x, a, b):
     return a*x+b
-
 
 conc1 = np.mean(list(ivals['0_2'].values()))
 conc2 = np.mean(list(ivals['0_5'].values()))
 conc3 = np.mean(list(ivals['1 new'].values()))
 
-coefs, pcov = curve_fit(func,[1.,2.,3.], [conc1,conc2,conc3])
+conc_vals = [54.5/5, 54.5/2., 54.5]
+
+coefs, pcov = curve_fit(func,conc_vals, [conc1,conc2,conc3])
 
 fig2, (ax2) = plt.subplots(1, 1, figsize=(18, 10))
 fig2.set_tight_layout(True)
 
+lod = 3*std/coefs[0]
 
-ax2.scatter([1.,2.,3.], [conc1,conc2,conc3], color='b')
+r2 = r2_score([conc1,conc2,conc3], func(np.array(conc_vals), *coefs))
+y_lod = func(lod, *coefs)
 
-ax2.plot([1.,2.,3.], func(np.array([1.,2.,3.]), *coefs), 'r-')
+ax2.scatter(conc_vals, [conc1,conc2,conc3], color='b')
+
+ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-')
+
+if legend == 1:
+    ax2.legend([ np.array2string(coefs[0], precision = 3)+ ' * x + ' + np.array2string(coefs[1], precision = 3) ,'data'], loc=0)
+
+ax2.set(xlabel='Concentration, mg/l',
+        ylabel='Int.values',
+        title='Diesel'
+        #       ylim = [0,1]
+        )
+
+ax2.text(45.,1000000.,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
+ax2.text(45.,1200000.,'LOD' + ' = ' + np.array2string(lod, precision = 3), fontsize=24)
+
+if do_save == 1:
+    fig2.savefig(sna + '2' + '.png', transparent=False, dpi=300, bbox_inches="tight")
+
+
+
 plt.show()
 
 
