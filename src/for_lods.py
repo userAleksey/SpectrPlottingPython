@@ -21,10 +21,10 @@ from scipy import signal
 from somedataproc import managedata, processdata
 
 do_save = 0
-rad_type = 'LED'
-day_of_exp = '11_06 (DT LED)'
+rad_type = 'LED 277'
+day_of_exp = '08_08_2019'
 
-datapath = join('..', 'data', day_of_exp)
+datapath = join('..', 'data', day_of_exp, 'for plotting')
 
 getivals = 1
 norm_max = 0
@@ -46,7 +46,7 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir,day_of_exp)
+sna = join(res_dir,rad_type + '_' + '0')
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
@@ -67,10 +67,14 @@ if getivals:
 
 data = {}
 
-for itm in listdir(datapath):
+itemslist = listdir(datapath)
+itemslist.sort()
+
+for itm in itemslist:
     if not isdir(join(datapath,itm)):
         continue
-    data[itm] = managedata.load_data(join('..', 'data', day_of_exp, itm))
+    #data[itm] = managedata.load_data(join('..', 'data', day_of_exp, itm))
+    data[itm] = managedata.load_data(join(datapath, itm))
     if getivals:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
     if average:
@@ -93,35 +97,41 @@ if legend == 1:
 ax1.set(xlabel='Wavelength, nm',
         ylabel='I, units',
         title=rad_type + ' ',
-        xlim=[280, 800],
-        #       ylim = [0,1]
+        xlim=[250, 700],
+        #     ylim = [0,900]
         )
+
+
+plt.show()
 
 if do_save == 1:
     fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
+
 #----- for lods
 std = np.std(list(ivals['Sea Water'].values()))
 
 def func(x, a, b):
     return a*x+b
 
-conc1 = np.mean(list(ivals['0_2'].values()))
-conc2 = np.mean(list(ivals['0_5'].values()))
-conc3 = np.mean(list(ivals['1 new'].values()))
+conc1 = np.mean(list(ivals['0_05(130)(2)'].values()))
+conc2 = np.mean(list(ivals['0_1(130)'].values()))
+conc3 = np.mean(list(ivals['0_2(130)'].values()))
+conc4 = np.mean(list(ivals['0_5(130)'].values()))
+conc5 = np.mean(list(ivals['1_0(130)(2)'].values()))
 
-conc_vals = [54.5/5, 54.5/2., 54.5]
+conc_vals = [54.5/20, 54.5/10, 54.5/5, 54.5/2., 54.5]
 
-coefs, pcov = curve_fit(func,conc_vals, [conc1,conc2,conc3])
+coefs, pcov = curve_fit(func,conc_vals, [conc1,conc2,conc3,conc4,conc5])
 
 fig2, (ax2) = plt.subplots(1, 1, figsize=(18, 10))
 fig2.set_tight_layout(True)
 
 lod = 3*std/coefs[0]
 
-r2 = r2_score([conc1,conc2,conc3], func(np.array(conc_vals), *coefs))
+r2 = r2_score([conc1,conc2,conc3,conc4,conc5], func(np.array(conc_vals), *coefs))
 y_lod = func(lod, *coefs)
 
-ax2.scatter(conc_vals, [conc1,conc2,conc3], color='b')
+ax2.scatter(conc_vals, [conc1,conc2,conc3,conc4,conc5], color='b')
 
 ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-')
 
@@ -130,19 +140,14 @@ if legend == 1:
 
 ax2.set(xlabel='Concentration, mg/l',
         ylabel='Int.values',
-        title='Diesel'
+        title='190'
         #       ylim = [0,1]
         )
 
 ax2.text(45.,1000000.,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
-ax2.text(45.,1200000.,'LOD' + ' = ' + np.array2string(lod, precision = 3), fontsize=24)
+ax2.text(45.,1200000.,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
-    fig2.savefig(sna + '2' + '.png', transparent=False, dpi=300, bbox_inches="tight")
-
-
-
-plt.show()
-
+    fig2.savefig(sna + '_' +'0' + '.png', transparent=False, dpi=300, bbox_inches="tight")
 
 plt.show()
