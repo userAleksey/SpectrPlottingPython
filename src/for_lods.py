@@ -113,13 +113,14 @@ std = np.std(list(ivals['Sea Water'].values()))
 def func(x, a, b):
     return a*x+b
 
-conc1 = np.mean(list(ivals['0_05(130)(2)'].values()))
-conc2 = np.mean(list(ivals['0_1(130)'].values()))
-conc3 = np.mean(list(ivals['0_2(130)'].values()))
-conc4 = np.mean(list(ivals['0_5(130)'].values()))
-conc5 = np.mean(list(ivals['1_0(130)(2)'].values()))
+conc1 = np.mean(list(ivals['0_05(19)'].values()))
+conc2 = np.mean(list(ivals['0_1(19)'].values()))
+conc3 = np.mean(list(ivals['0_2(19)'].values()))
+conc4 = np.mean(list(ivals['0_5(19)'].values()))
+conc5 = np.mean(list(ivals['1(19)'].values()))
 
-conc_vals = [54.5/20, 54.5/10, 54.5/5, 54.5/2., 54.5]
+max_conc = 127.1
+conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 coefs, pcov = curve_fit(func,conc_vals, [conc1,conc2,conc3,conc4,conc5])
 
@@ -140,12 +141,12 @@ if legend == 1:
 
 ax2.set(xlabel='Concentration, mg/l',
         ylabel='Int.values',
-        title='190'
+        title='19'
         #       ylim = [0,1]
         )
 
-ax2.text(45.,1000000.,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
-ax2.text(45.,1200000.,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
+ax2.text(max_conc - max_conc/8,conc1 + conc1/3,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
     fig2.savefig(sna + '_' +'0' + '.png', transparent=False, dpi=300, bbox_inches="tight")
