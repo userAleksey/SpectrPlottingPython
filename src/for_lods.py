@@ -20,9 +20,10 @@ from scipy import signal
 
 from somedataproc import managedata, processdata
 
-do_save = 0
+do_save = 1
+string1 = '130'
 rad_type = 'LED 277'
-day_of_exp = '08_08_2019'
+day_of_exp = '13_08_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting')
 
@@ -46,7 +47,7 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir,rad_type + '_' + '0')
+sna = join(res_dir,rad_type + '_' + string1 + '_0')
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
@@ -113,13 +114,15 @@ std = np.std(list(ivals['Sea Water'].values()))
 def func(x, a, b):
     return a*x+b
 
-conc1 = np.mean(list(ivals['0_05(19)'].values()))
-conc2 = np.mean(list(ivals['0_1(19)'].values()))
-conc3 = np.mean(list(ivals['0_2(19)'].values()))
-conc4 = np.mean(list(ivals['0_5(19)'].values()))
-conc5 = np.mean(list(ivals['1(19)'].values()))
+conc1 = np.mean(list(ivals['0_05(130)'].values()))
+conc2 = np.mean(list(ivals['0_1(130)'].values()))
+conc3 = np.mean(list(ivals['0_2(130)'].values()))
+conc4 = np.mean(list(ivals['0_5(130)'].values()))
+conc5 = np.mean(list(ivals['1(130)'].values()))
 
-max_conc = 127.1
+# 19 - 127.1 , 130 - 133.9
+
+max_conc = 133.9
 conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 coefs, pcov = curve_fit(func,conc_vals, [conc1,conc2,conc3,conc4,conc5])
@@ -146,7 +149,7 @@ ax2.set(xlabel='Concentration, mg/l',
         )
 
 ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
-ax2.text(max_conc - max_conc/8,conc1 + conc1/3,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
     fig2.savefig(sna + '_' +'0' + '.png', transparent=False, dpi=300, bbox_inches="tight")
