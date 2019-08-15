@@ -20,8 +20,8 @@ from scipy import signal
 
 from somedataproc import managedata, processdata
 
-do_save = 1
-string1 = '130'
+do_save = 0
+str1 = '130'
 rad_type = 'LED 277'
 day_of_exp = '13_08_2019'
 
@@ -47,7 +47,7 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir,rad_type + '_' + string1 + '_0')
+sna = join(res_dir,rad_type + '_' + str1 + '_0')
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
@@ -144,7 +144,7 @@ if legend == 1:
 
 ax2.set(xlabel='Concentration, mg/l',
         ylabel='Int.values',
-        title='19'
+        title=str1
         #       ylim = [0,1]
         )
 
