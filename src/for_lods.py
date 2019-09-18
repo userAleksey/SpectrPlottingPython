@@ -21,23 +21,29 @@ from scipy import signal
 from somedataproc import managedata, processdata
 
 do_save = 0
-str1 = '130'
+str1 = 'plastiks'
 rad_type = 'LED 277'
-day_of_exp = '13_08_2019'
+day_of_exp = '17_09_2019'
 
-datapath = join('..', 'data', day_of_exp, 'for plotting')
+datapath = join('..', 'data', day_of_exp, 'for plotting2')
 
 getivals = 1
 norm_max = 0
+norm_val = 1
 smooth = 0
 backgroundless = 0
 legend = 1
 average = 1
+dyax = 0
 
 if getivals:
     ivals = {}
     lim1 = 300
     lim2 = 525
+
+if norm_val:
+    nlim1 = 250
+    nlim2 = 300
 
 font = {'family': 'normal',
         'weight': 'bold',
@@ -66,6 +72,9 @@ wl = np.char.replace(wl, ',', '.').astype(np.float64)
 if getivals:
     idxs = [i for i, x in enumerate(wl) if x > lim1 and x < lim2]
 
+if norm_val:
+    n_idxs = [i for i, x in enumerate(wl) if x > nlim1 and x < nlim2]
+
 data = {}
 
 itemslist = listdir(datapath)
@@ -82,25 +91,64 @@ for itm in itemslist:
         data[itm] = managedata.average(data[itm])
     if norm_max:
         data[itm] = managedata.norm_max(data[itm])
+    if norm_val:
+        data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
 
 # ----------------------------------------------------
 
 fig, (ax1) = plt.subplots(1, 1, figsize=(18, 10))
+if dyax == 1:
+    ax2 = ax1.twinx()
+
 fig.set_tight_layout(True)
 
 for itm in data:
+    if itm == 'RMB80(300ms)' or itm == 'RMG380' or itm == 'rmg180' or itm == 'Чистая нефть':
+        continue
     for itm2 in data[itm]:
         ax1.plot(wl, data[itm][itm2])
-
 if legend == 1:
     ax1.legend(list(data.keys()), loc=0)
 
-ax1.set(xlabel='Wavelength, nm',
-        ylabel='I, units',
-        title=rad_type + ' ',
-        xlim=[250, 700],
-        #     ylim = [0,900]
-        )
+if dyax == 1:
+    for itm in data:
+        if itm == 'RMB80(300ms)':
+            for itm2 in data[itm]:
+                ax2.plot(wl, data[itm][itm2], 'm-')
+        if itm == 'RMG380':
+            for itm2 in data[itm]:
+                ax2.plot(wl, data[itm][itm2], 'y-')
+        if itm == 'rmg180':
+            for itm2 in data[itm]:
+                ax2.plot(wl, data[itm][itm2], 'k-')
+        if itm == 'Чистая нефть':
+            for itm2 in data[itm]:
+                ax2.plot(wl, data[itm][itm2], color = '0.75')
+    if legend == 1:
+        # ax2.legend(list(data.keys()), loc=0, bbox_to_anchor=(0.5, 0., 0.5, 0.8))
+        ax2.legend(list(data.keys())[4:8], loc=0)
+
+    ax2.set(xlabel='Wavelength, nm',
+            ylabel='I, units',
+            title=rad_type + ' ',
+            xlim=[100, 800],
+            #   ylim = [0,5000]
+            )
+if norm_val == 1 or norm_max == 1:
+    ax1.set(xlabel='Wavelength, nm',
+            ylabel='I, units',
+            title=rad_type + ' ',
+            xlim=[250, 900],
+            ylim=[0, 1]
+            )
+else:
+    ax1.set(xlabel='Wavelength, nm',
+            ylabel='I, units',
+            title=rad_type + ' ',
+            xlim=[250, 900],
+             ylim = [0,4000]
+            )
+
 
 
 plt.show()
