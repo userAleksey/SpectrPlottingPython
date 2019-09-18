@@ -42,6 +42,12 @@ def getivals (data, x, idxs):
         Data[itm] = np.trapz(data[itm][idxs[0]:idxs[-1]],x[idxs[0]:idxs[-1]])
     return Data
 
+def norm_val (data, x, idxs):
+    Data = {}
+    for itm in data:
+        Data[itm] = data[itm] / max(data[itm][idxs[0]:idxs[-1]])
+    return Data
+
 # def smooth (Data):
 #     for itm in Data:
 #         Data[itm] = signal.savgol_filter(Data[itm], 11, 1)
