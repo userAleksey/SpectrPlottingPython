@@ -3,6 +3,7 @@ import numpy as np
 import re
 from os.path import join
 from PIL import Image
+from scipy import signal
 
 def natural_sort(l):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
@@ -48,9 +49,11 @@ def norm_val (data, x, idxs):
         Data[itm] = data[itm] / max(data[itm][idxs[0]:idxs[-1]])
     return Data
 
-# def smooth (Data):
-#     for itm in Data:
-#         Data[itm] = signal.savgol_filter(Data[itm], 11, 1)
+def smooth (data):
+    Data = {}
+    for itm in data:
+        Data[itm] = signal.savgol_filter(data[itm], 11, 1)
+    return Data
 #
 # def backgroundless (Data, first, last):
 #     for itm in Data:
