@@ -18,10 +18,10 @@ import datetime
 
 from somedataproc import managedata, processdata
 
-do_save = 0
-str1 = 'crude oil'
+do_save = 1
+str1 = 'kerosin'
 rad_type = 'LED_277'
-day_of_exp = '04_10_2019'
+day_of_exp = '10_10_2019(Kerosin Lod)'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting')
 
@@ -31,6 +31,7 @@ norm_val = 0
 smooth = 0
 backgroundless = 0
 legend = 1
+lod_legend = 0
 average = 1
 dyax = 0
 
@@ -77,7 +78,7 @@ data = {}
 
 itemslist = listdir(datapath)
 itemslist.sort()
-itemslist = managedata.natural_sort(itemslist)
+#itemslist = managedata.natural_sort(itemslist)
 
 for itm in itemslist:
     if not isdir(join(datapath,itm)):
@@ -150,8 +151,8 @@ if norm_val == 1 or norm_max == 1:
 else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
-            title= ' ' + ' ',
-            xlim=[250, 700],
+            title= str1 + ' ',
+            xlim=[250, 600],
             #ylim = [0,4000]
             )
 
@@ -168,17 +169,18 @@ std = np.std(list(ivals['SeaWater'].values()))
 def func(x, a, b):
     return a*x+b
 
-# 19 - 127.1 , 130 - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9
+# 19 - 127.1 , 130 - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
+# rmg380 - 3.4, kerosin - 142.2
 
-max_conc = 12.9
+max_conc = 142.2
 conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
-sample = "crude oil"
-conc1 = np.mean(list(ivals['0.64 ppm (crude oil )'].values()))
-conc2 = np.mean(list(ivals['1.29 ppm (crude oil )'].values()))
-conc3 = np.mean(list(ivals['2.58 ppm (crude oil )'].values()))
-conc4 = np.mean(list(ivals['6.45 ppm (crude oil )'].values()))
-conc5 = np.mean(list(ivals['12.9 ppm (crude oil )'].values()))
+
+conc1 = np.mean(list(ivals['7.1 ppm'].values()))
+conc2 = np.mean(list(ivals['14.2 ppm'].values()))
+conc3 = np.mean(list(ivals['28.4 ppm'].values()))
+conc4 = np.mean(list(ivals['71.1 ppm'].values()))
+conc5 = np.mean(list(ivals['142.2 ppm'].values()))
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
@@ -214,17 +216,18 @@ ax2.scatter(conc_vals, [conc1,conc2,conc3,conc4,conc5], color='b')
 ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-')
 #ax2.plot(conc_vals2, func(np.array(conc_vals2), *coefs2), 'k-')
 
-if legend == 1:
+if lod_legend == 1:
     ax2.legend([ np.array2string(coefs[0], precision = 3)+ ' * x + ' + np.array2string(coefs[1], precision = 3) ,'data'], loc=0)
 
 ax2.set(xlabel='Concentration, mg/l',
-        ylabel='Int.values',
-        title=str1
+        ylabel=r'$\alpha$',
+        title=str1,
         #       ylim = [0,1]
         )
 
+ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
-ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+ax2.text(max_conc - max_conc/8,conc1 + conc1/5,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
     fig2.savefig(sna + '_' +'1' + '.png', transparent=False, dpi=300, bbox_inches="tight")
