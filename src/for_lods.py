@@ -19,9 +19,9 @@ import datetime
 from somedataproc import managedata, processdata
 
 do_save = 1
-str1 = 'kerosin'
-rad_type = 'LED_277'
-day_of_exp = '10_10_2019(Kerosin Lod)'
+str1 = 'dma_dmz'
+rad_type = 'LED_'
+day_of_exp = '20_11_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting')
 
@@ -61,12 +61,15 @@ if not isdir(res_dir):
 for itm in listdir(datapath):
     if itm.endswith(".txt"):
         wl = np.loadtxt(join(datapath, itm ), dtype=np.str, usecols=0, skiprows=17, comments='>')
+        #wl = np.loadtxt(join(datapath, itm ), dtype=np.str, usecols=0, comments='>')
 wl = np.char.replace(wl, ',', '.').astype(np.float64)
 
-#wl = []
-#for i in range(len(wl2)):
+# for tifs
+#wl2 = []
+#for i in range(len(wl)):
 #    if i % 2 == 0:
-#        wl.append(wl2[i])
+#        wl2.append(wl[i])
+#wl = wl2
 
 if getivals:
     idxs = [i for i, x in enumerate(wl) if x > lim1 and x < lim2]
@@ -78,7 +81,7 @@ data = {}
 
 itemslist = listdir(datapath)
 itemslist.sort()
-#itemslist = managedata.natural_sort(itemslist)
+itemslist = managedata.natural_sort(itemslist)
 
 for itm in itemslist:
     if not isdir(join(datapath,itm)):
@@ -89,12 +92,14 @@ for itm in itemslist:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
     if average:
         data[itm] = managedata.average(data[itm])
+    if smooth:
+        if itm == 'RMB80 slick (80 mcm)':
+            data[itm] = managedata.smooth(data[itm])
     if norm_max:
         data[itm] = managedata.norm_max(data[itm])
     if norm_val:
         data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
-    if smooth:
-        data[itm] = managedata.smooth(data[itm])
+
 
 # ----------------------------------------------------
 
@@ -105,15 +110,19 @@ if dyax == 1:
 fig.set_tight_layout(True)
 
 for itm in data:
-    if itm == '1(19)' or itm == 'RMG180' or itm == 'crude oil':
+    if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
         continue
     for itm2 in data[itm]:
+        if itm == '5_d_dma 6.355 ppm' or itm == '5_d_dma 63.55 ppm' or itm == '5_d_dma 127.1 ppm' or itm == '5_d_dmz 6.695 ppm' or itm == '5_d_dmz 66.95 ppm' or itm == '5_d_dmz 133.9 ppm':
+            ax1.plot(wl, data[itm][itm2], '--')
+            continue
         ax1.plot(wl, data[itm][itm2])
+
 #if legend == 1:
 #    ax1.legend(list(data.keys()), loc=2)
 
 if legend == 1:
-#ax1.legend(['RMB80 film (80 mcm)','RMB80 solution (22.2 ppm)','RMB80'], loc=1)
+    #ax1.legend(['RMB80','RMB80 slick (80 '+ r'$\mu$' + 'm)','RMB80 solution (22.2 ppm)'], loc=1)
     ax1.legend(list(data.keys()), loc=1)
 
 if dyax == 1:
@@ -151,8 +160,8 @@ if norm_val == 1 or norm_max == 1:
 else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
-            title= str1 + ' ',
-            xlim=[250, 600],
+            title= ' ' + ' ',
+            xlim=[200, 700],
             #ylim = [0,4000]
             )
 
@@ -170,17 +179,17 @@ def func(x, a, b):
     return a*x+b
 
 # 19 - 127.1 , 130 - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
-# rmg380 - 3.4, kerosin - 142.2
+# rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4
 
-max_conc = 142.2
+max_conc = 2.4
 conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 
-conc1 = np.mean(list(ivals['7.1 ppm'].values()))
-conc2 = np.mean(list(ivals['14.2 ppm'].values()))
-conc3 = np.mean(list(ivals['28.4 ppm'].values()))
-conc4 = np.mean(list(ivals['71.1 ppm'].values()))
-conc5 = np.mean(list(ivals['142.2 ppm'].values()))
+conc1 = np.mean(list(ivals['0.12 ppm'].values()))
+conc2 = np.mean(list(ivals['0.24 ppm'].values()))
+conc3 = np.mean(list(ivals['0.48 ppm'].values()))
+conc4 = np.mean(list(ivals['1.2 ppm'].values()))
+conc5 = np.mean(list(ivals['2.4 ppm'].values()))
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
@@ -227,7 +236,7 @@ ax2.set(xlabel='Concentration, mg/l',
 
 ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
-ax2.text(max_conc - max_conc/8,conc1 + conc1/5,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
     fig2.savefig(sna + '_' +'1' + '.png', transparent=False, dpi=300, bbox_inches="tight")
