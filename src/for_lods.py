@@ -18,9 +18,9 @@ import datetime
 
 from somedataproc import managedata, processdata
 
-do_save = 1
-str1 = 'dma_dmz'
-rad_type = 'LED_'
+do_save = 0
+str1 = 'dmadmz'
+rad_type = 'LED_278'
 day_of_exp = '20_11_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting')
@@ -161,7 +161,7 @@ else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[200, 700],
+            xlim=[200, 800],
             #ylim = [0,4000]
             )
 
@@ -171,6 +171,35 @@ plt.show()
 
 if do_save == 1:
     fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
+
+#----- fitting
+for itm in data['dma 127.1 ppm']:
+    y = data['dma 127.1 ppm'][itm]
+
+#import pylab as plb
+from scipy.optimize import curve_fit
+from scipy import asarray as ar,exp
+
+n = len(wl)
+#max = max(y)#the number of data
+max = 24000#the number of data
+#mean = sum(wl*y)/n                   #note this correction
+mean = 350                 #note this correction
+#sigma = sum(y*(wl-mean)**2)/n        #note this correction
+sigma = 60        #note this correction
+
+def gaus(x,a,x0,sigma):
+    return a*exp(-(x-x0)**2/(2*sigma**2))
+
+popt,pcov = curve_fit(gaus,wl,y,p0=[max,mean,sigma])
+
+plt.plot(wl,y,'b+:',label='data')
+plt.plot(wl,gaus(wl,*popt),'ro:',label='fit')
+plt.legend()
+plt.title('Fig. 3 - Fit ')
+plt.xlabel('wavelength (nm)')
+plt.ylabel('vals ()')
+plt.show()
 
 #----- for lods
 std = np.std(list(ivals['SeaWater'].values()))
