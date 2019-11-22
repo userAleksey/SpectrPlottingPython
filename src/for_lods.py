@@ -34,6 +34,8 @@ legend = 1
 lod_legend = 0
 average = 1
 dyax = 0
+fitting = 1
+something = 0
 
 if getivals:
     ivals = {}
@@ -165,42 +167,76 @@ else:
             #ylim = [0,4000]
             )
 
-
-
 plt.show()
+
+#------------something1
+if something:
+    for itm in data['DMA (63.55 ppm) + DMZ (66.95 ppm)']:
+        y = data['DMA (63.55 ppm) + DMZ (66.95 ppm)'][itm]
+
+    bnds_lim1 = 340
+    bnds_lim2 = 355
+    bnds_idxs = [i for i, x in enumerate(wl) if x > bnds_lim1 and x < bnds_lim2]
+    abs_max = max(y[bnds_idxs[0]:bnds_idxs[-1]])
+    abs_min = min(y[bnds_idxs[0]:bnds_idxs[-1]])
+    abs_val = abs_max - abs_min
+    print(abs_val)
+    #val1 = (abs_val - 526.6857) / 20.6157
+    val1 = (abs_val - 434.2891) / 27.758
+
+
+    print(val1)
+
+    # dma : -19.2904291389572
+    # dmz : 2.2743317241876073
+    # dma + dmz: -5.529544635780678
+
+
+    for itm in ivals['DMA (63.55 ppm) + DMZ (66.95 ppm)']:
+        yi = ivals['DMA (63.55 ppm) + DMZ (66.95 ppm)'][itm]
+    #val2 = (yi - 404553.151) / 28215.851
+    val2 = (yi - 402769.829) / 42837.715
+    print(yi)
+    print(val2)
+
+    # dma: -9.392502533416414
+    # dmz: 0.8360391671217748
+    # dma + dmz: -3.0903133154978044
+#-----------------------------------
 
 if do_save == 1:
     fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
 
 #----- fitting
-for itm in data['dma 127.1 ppm']:
-    y = data['dma 127.1 ppm'][itm]
+if fitting:
+    for itm in data['1(19)']:
+        y = data['1(19)'][itm]
 
-#import pylab as plb
-from scipy.optimize import curve_fit
-from scipy import asarray as ar,exp
+    #import pylab as plb
+    from scipy.optimize import curve_fit
+    from scipy import asarray as ar,exp
 
-n = len(wl)
-#max = max(y)#the number of data
-max = 24000#the number of data
-#mean = sum(wl*y)/n                   #note this correction
-mean = 350                 #note this correction
-#sigma = sum(y*(wl-mean)**2)/n        #note this correction
-sigma = 60        #note this correction
+    n = len(wl)
+    #max = max(y)#the number of data
+    max = 27100#the number of data
+    #mean = sum(wl*y)/n                   #note this correction
+    mean = 335                 #note this correction
+    #sigma = sum(y*(wl-mean)**2)/n        #note this correction
+    sigma = 19      #note this correction
 
-def gaus(x,a,x0,sigma):
-    return a*exp(-(x-x0)**2/(2*sigma**2))
+    def gaus(x,a,x0,sigma):
+        return a*exp(-(x-x0)**2/(2*sigma**2))
 
-popt,pcov = curve_fit(gaus,wl,y,p0=[max,mean,sigma])
+    popt,pcov = curve_fit(gaus,wl,y,p0=[max,mean,sigma],bounds = ([27100, 335, 19],[27200,341,20]))
 
-plt.plot(wl,y,'b+:',label='data')
-plt.plot(wl,gaus(wl,*popt),'ro:',label='fit')
-plt.legend()
-plt.title('Fig. 3 - Fit ')
-plt.xlabel('wavelength (nm)')
-plt.ylabel('vals ()')
-plt.show()
-
+    plt.plot(wl,y,'b+:',label='data')
+    plt.plot(wl,gaus(wl,*popt),'ro:',label='fit')
+    plt.legend()
+    plt.title('Fig. 3 - Fit ')
+    plt.xlabel('wavelength (nm)')
+    plt.ylabel('vals ()')
+    plt.show()
+#--------------
 #----- for lods
 std = np.std(list(ivals['SeaWater'].values()))
 
