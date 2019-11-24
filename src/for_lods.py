@@ -21,7 +21,7 @@ from somedataproc import managedata, processdata
 do_save = 0
 str1 = 'dmadmz'
 rad_type = 'LED_278'
-day_of_exp = '20_11_2019'
+day_of_exp = '08_08_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting')
 
@@ -35,7 +35,7 @@ lod_legend = 0
 average = 1
 dyax = 0
 fitting = 1
-something = 0
+something = 1
 
 if getivals:
     ivals = {}
@@ -171,19 +171,23 @@ plt.show()
 
 #------------something1
 if something:
-    for itm in data['DMA (63.55 ppm) + DMZ (66.95 ppm)']:
-        y = data['DMA (63.55 ppm) + DMZ (66.95 ppm)'][itm]
+    n_str1 = '0_05(19)'
+    n_str2 = '1(19)'
+    for itm in data[n_str1]:
+        y = data[n_str1][itm]
 
     bnds_lim1 = 340
     bnds_lim2 = 355
     bnds_idxs = [i for i, x in enumerate(wl) if x > bnds_lim1 and x < bnds_lim2]
     abs_max = max(y[bnds_idxs[0]:bnds_idxs[-1]])
     abs_min = min(y[bnds_idxs[0]:bnds_idxs[-1]])
+    print('abs_min: ' + str(abs_min))
+    min_idx = [i for i, x in enumerate(y) if x == abs_min]
+    print('min_idx: ' + str(min_idx))
     abs_val = abs_max - abs_min
     print(abs_val)
     #val1 = (abs_val - 526.6857) / 20.6157
     val1 = (abs_val - 434.2891) / 27.758
-
 
     print(val1)
 
@@ -191,9 +195,8 @@ if something:
     # dmz : 2.2743317241876073
     # dma + dmz: -5.529544635780678
 
-
-    for itm in ivals['DMA (63.55 ppm) + DMZ (66.95 ppm)']:
-        yi = ivals['DMA (63.55 ppm) + DMZ (66.95 ppm)'][itm]
+    for itm in ivals[n_str2]:
+        yi = ivals[n_str2][itm]
     #val2 = (yi - 404553.151) / 28215.851
     val2 = (yi - 402769.829) / 42837.715
     print(yi)
@@ -209,8 +212,8 @@ if do_save == 1:
 
 #----- fitting
 if fitting:
-    for itm in data['1(19)']:
-        y = data['1(19)'][itm]
+    for itm in data[n_str1]:
+        y = data[n_str1][itm]
 
     #import pylab as plb
     from scipy.optimize import curve_fit
@@ -218,24 +221,66 @@ if fitting:
 
     n = len(wl)
     #max = max(y)#the number of data
-    max = 27100#the number of data
+    minA = 3800#the number of data
+    maxA = 3900
     #mean = sum(wl*y)/n                   #note this correction
     mean = 335                 #note this correction
     #sigma = sum(y*(wl-mean)**2)/n        #note this correction
-    sigma = 19      #note this correction
+    sigma = 20      #note this correction
 
     def gaus(x,a,x0,sigma):
         return a*exp(-(x-x0)**2/(2*sigma**2))
 
-    popt,pcov = curve_fit(gaus,wl,y,p0=[max,mean,sigma],bounds = ([27100, 335, 19],[27200,341,20]))
+    popt,pcov = curve_fit(gaus,wl,y,p0=[minA,mean,sigma],bounds = ([minA, 335, 20],[maxA,341,21]))
 
     plt.plot(wl,y,'b+:',label='data')
     plt.plot(wl,gaus(wl,*popt),'ro:',label='fit')
     plt.legend()
     plt.title('Fig. 3 - Fit ')
-    plt.xlabel('wavelength (nm)')
-    plt.ylabel('vals ()')
+    plt.xlabel('Wavelength, nm')
+    plt.ylabel('I, rel. un.')
+    plt.xlim(300, 400)
+
     plt.show()
+
+    abs_max1 = gaus(wl[min_idx],*popt)
+    print('abs_max1: ' + str(abs_max1))
+
+    conc5 = 27663.15286988 - 20358.72642857143
+    conc4 = 17415.26739332 - 12444.878666666667
+    conc3 = 11610.17826222 - 8311.06185185185
+    conc2 = 6772.60398629 - 4522.166551724138
+    conc1 = 3795.98106328 - 2926.1040740740746
+
+
+    def func(x, a, b):
+        return a * x + b
+
+    max_conc = 127.1
+    conc_vals = [max_conc / 20, max_conc / 10, max_conc / 5, max_conc / 2., max_conc]
+    coefs, pcov = curve_fit(func, conc_vals, [conc1, conc2, conc3, conc4, conc5])
+
+    fig2, (ax2) = plt.subplots(1, 1, figsize=(18, 10))
+    fig2.set_tight_layout(True)
+
+    r2 = r2_score([conc1, conc2, conc3, conc4, conc5], func(np.array(conc_vals), *coefs))
+
+    ax2.scatter(conc_vals, [conc1, conc2, conc3, conc4, conc5], color='b')
+
+    ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-')
+
+    ax2.set(xlabel='Concentration, mg/l',
+            ylabel=r'$\alpha$',
+            title=str1,
+            #       ylim = [0,1]
+            )
+
+    ax2.ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+    ax2.text(max_conc - max_conc / 8, conc1, r'$R^2$' + ' = ' + np.array2string(r2, precision=3), fontsize=24)
+
+    plt.show()
+
+
 #--------------
 #----- for lods
 std = np.std(list(ivals['SeaWater'].values()))
