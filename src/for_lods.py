@@ -231,6 +231,85 @@ if fitting:
     def gaus(x,a,x0,sigma):
         return a*exp(-(x-x0)**2/(2*sigma**2))
 
+    def _1gaussian(x, amp1, cen1, sigma1):
+        return amp1 * (1 / (sigma1 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen1) / sigma1) ** 2)))
+
+    def _2gaussian(x, amp1, cen1, sigma1, amp2, cen2, sigma2):
+        return amp1 * (1 / (sigma1 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen1) / sigma1) ** 2))) + \
+               amp2 * (1 / (sigma2 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen2) / sigma2) ** 2)))
+
+    def _3gaussian(x, amp1, cen1, sigma1, amp2, cen2, sigma2, amp3, cen3, sigma3):
+        return amp1 * (1 / (sigma1 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen1) / sigma1) ** 2))) + \
+               amp2 * (1 / (sigma2 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen2) / sigma2) ** 2))) + \
+               amp3 * (1 / (sigma3 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen3) / sigma3) ** 2)))
+
+    def _4gaussian(x, amp1, cen1, sigma1, amp2, cen2, sigma2, amp3, cen3, sigma3, amp4, cen4, sigma4):
+        return amp1 * (1 / (sigma1 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen1) / sigma1) ** 2))) + \
+               amp2 * (1 / (sigma2 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen2) / sigma2) ** 2))) + \
+               amp3 * (1 / (sigma3 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen3) / sigma3) ** 2))) + \
+               amp4 * (1 / (sigma4 * (np.sqrt(2 * np.pi)))) * (np.exp((-1.0 / 2.0) * (((x - cen4) / sigma4) ** 2)))
+
+    amp1 = 20000
+    sigma1 = 5
+    cen1 = 200
+
+    amp2 = 20000
+    sigma2 = 5
+    cen2 = 200
+
+    amp3 = 20000
+    sigma3 = 5
+    cen3 = 200
+
+    amp4 = 20000
+    sigma4 = 5
+    cen4 = 200
+
+    #popt_1gauss, pcov_1gauss = curve_fit(_1gaussian, wl, y, p0=[amp1, cen1, sigma1])
+    #popt_3gauss, pcov_3gauss = curve_fit(_3gaussian, wl, y, p0=[amp1, cen1, sigma1, amp2, cen2, sigma2, amp3, cen3, sigma3])
+    popt_2gauss, pcov_2gauss = curve_fit(_2gaussian, wl, y, p0=[amp1, cen1, sigma1, amp2, cen2, sigma2],bounds = ([0, 200, 1,0, 200, 1], \
+                                                  [5000000,800,250,5000000,800,250]),maxfev=10000)
+    #popt_4gauss, pcov_4gauss = curve_fit(_4gaussian, wl, y, p0=[amp1, cen1, sigma1, amp2, cen2, sigma2, amp3, cen3, sigma3, amp4, cen4, sigma4], \
+    #                                     bounds = ([0, 200, 1,0, 200, 1,0, 200, 1,0, 200, 1], \
+    #                                               [500000,800,25,500000,800,25,500000,800,25,500000,800,25]),maxfev=10000)
+    #perr_3gauss = np.sqrt(np.diag(pcov_3gauss))
+    perr_2gauss = np.sqrt(np.diag(pcov_2gauss))
+    #perr_4gauss = np.sqrt(np.diag(pcov_4gauss))
+    #perr_1gauss = np.sqrt(np.diag(pcov_1gauss))
+
+    print("amplitude1 = %0.2f (+/-) %0.2f" % (popt_2gauss[0], perr_2gauss[0]))
+    print("center1 = %0.2f (+/-) %0.2f" % (popt_2gauss[1], perr_2gauss[1]))
+    print("sigma1 = %0.2f (+/-) %0.2f" % (popt_2gauss[2], perr_2gauss[2]))
+
+    print("amplitude2 = %0.2f (+/-) %0.2f" % (popt_2gauss[3], perr_2gauss[3]))
+    print("center2 = %0.2f (+/-) %0.2f" % (popt_2gauss[4], perr_2gauss[4]))
+    print("sigma2 = %0.2f (+/-) %0.2f" % (popt_2gauss[5], perr_2gauss[5]))
+
+    pars_1 = popt_2gauss[0:3]
+    pars_2 = popt_2gauss[3:6]
+    #pars_3 = popt_4gauss[6:9]
+    #pars_4 = popt_4gauss[9:12]
+    gauss_peak_1 = _1gaussian(wl, *pars_1)
+    gauss_peak_2 = _1gaussian(wl, *pars_2)
+    #gauss_peak_3 = _1gaussian(wl, *pars_3)
+    #gauss_peak_4 = _1gaussian(wl, *pars_4)
+
+    #ax1.plot(wl, _3gaussian(wl, *popt_3gauss), 'k--')
+    #ax1.plot(wl, _1gaussian(wl, *popt_1gauss), 'k--')
+    ax1.plot(wl, _2gaussian(wl, *popt_2gauss), 'k--')
+
+    ax1.plot(wl, gauss_peak_1, "g")
+    ax1.fill_between(wl, gauss_peak_1.min(), gauss_peak_1, facecolor="green", alpha=0.5)
+
+    ax1.plot(wl, gauss_peak_2, "y")
+    ax1.fill_between(wl, gauss_peak_2.min(), gauss_peak_2, facecolor="yellow", alpha=0.5)
+
+    #ax1.plot(wl, gauss_peak_3, "b")
+    #ax1.fill_between(wl, gauss_peak_3.min(), gauss_peak_3, facecolor="blue", alpha=0.5)
+
+    #ax1.plot(wl, gauss_peak_4, "r")
+    #ax1.fill_between(wl, gauss_peak_4.min(), gauss_peak_4, facecolor="red", alpha=0.5)
+
     popt,pcov = curve_fit(gaus,wl,y,p0=[minA,mean,sigma],bounds = ([minA, 335, 20],[maxA,341,21]))
 
     plt.plot(wl,y,'b+:',label='data')
@@ -243,14 +322,20 @@ if fitting:
 
     plt.show()
 
-    abs_max1 = gaus(wl[min_idx],*popt)
+    #abs_max1 = gaus(wl[min_idx],*popt)
+    abs_max1 = _2gaussian(wl[min_idx],*popt_2gauss)
     print('abs_max1: ' + str(abs_max1))
 
-    conc5 = 27663.15286988 - 20358.72642857143
-    conc4 = 17415.26739332 - 12444.878666666667
-    conc3 = 11610.17826222 - 8311.06185185185
-    conc2 = 6772.60398629 - 4522.166551724138
-    conc1 = 3795.98106328 - 2926.1040740740746
+    #conc5 = 27663.15286988 - 20358.72642857143
+    conc5 = 23220.03910999 - 20358.72642857143
+    #conc4 = 17415.26739332 - 12444.878666666667
+    conc4 = 14326.37876527 - 12444.878666666667
+    #conc3 = 11610.17826222 - 8311.06185185185
+    conc3 = 9518.28733114 - 8311.06185185185
+    #conc2 = 6772.60398629 - 4522.166551724138
+    conc2 = 5169.37227701 - 4522.166551724138
+    #conc1 = 3795.98106328 - 2926.1040740740746
+    conc1 = 3344.02459665 - 2926.1040740740746
 
 
     def func(x, a, b):
