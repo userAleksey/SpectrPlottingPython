@@ -18,10 +18,10 @@ import datetime
 
 from somedataproc import managedata, processdata
 
-do_save = 0
-str1 = 'dmadmz'
+do_save = 1
+str1 = 'dma'
 rad_type = 'LED_278'
-day_of_exp = '08_08_2019'
+day_of_exp = '20_11_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting')
 
@@ -34,8 +34,8 @@ legend = 1
 lod_legend = 0
 average = 1
 dyax = 0
-fitting = 1
-something = 1
+fitting = 0
+something = 0
 
 if getivals:
     ivals = {}
@@ -115,8 +115,23 @@ for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
         continue
     for itm2 in data[itm]:
-        if itm == '5_d_dma 6.355 ppm' or itm == '5_d_dma 63.55 ppm' or itm == '5_d_dma 127.1 ppm' or itm == '5_d_dmz 6.695 ppm' or itm == '5_d_dmz 66.95 ppm' or itm == '5_d_dmz 133.9 ppm':
-            ax1.plot(wl, data[itm][itm2], '--')
+        if itm == 'DMA 6 ppm':
+            ax1.plot(wl, data[itm][itm2], 'r')
+            continue
+        if itm == 'DMA 6 ppm (5d)':
+            ax1.plot(wl, data[itm][itm2], '--r')
+            continue
+        if itm == 'DMA 63 ppm':
+            ax1.plot(wl, data[itm][itm2], 'y')
+            continue
+        if itm == 'DMA 63 ppm (5d)':
+            ax1.plot(wl, data[itm][itm2], '--y')
+            continue
+        if itm == 'DMA 127 ppm':
+            ax1.plot(wl, data[itm][itm2], 'g')
+            continue
+        if itm == 'DMA 127 ppm (5d)':
+            ax1.plot(wl, data[itm][itm2], '--g')
             continue
         ax1.plot(wl, data[itm][itm2])
 
@@ -124,7 +139,7 @@ for itm in data:
 #    ax1.legend(list(data.keys()), loc=2)
 
 if legend == 1:
-    #ax1.legend(['RMB80','RMB80 slick (80 '+ r'$\mu$' + 'm)','RMB80 solution (22.2 ppm)'], loc=1)
+    #ax1.legend(['DMA','DMA film (80 '+ r'$\mu$' + 'm)','DMA solution (127.1 ppm)'], loc=1)
     ax1.legend(list(data.keys()), loc=1)
 
 if dyax == 1:
@@ -156,17 +171,19 @@ if norm_val == 1 or norm_max == 1:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[250, 900],
+            xlim=[250, 600],
             ylim=[0, 1]
             )
 else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[200, 800],
+            xlim=[200, 700],
             #ylim = [0,4000]
             )
 
+
+ax1.ticklabel_format(axis='y', style='sci', scilimits=(3,3))
 plt.show()
 
 #------------something1
