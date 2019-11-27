@@ -18,7 +18,7 @@ import datetime
 
 from somedataproc import managedata, processdata
 
-do_save = 1
+do_save = 0
 str1 = 'dma'
 rad_type = 'LED_278'
 day_of_exp = '20_11_2019'
@@ -35,7 +35,7 @@ lod_legend = 0
 average = 1
 dyax = 0
 fitting = 0
-something = 0
+something = 1
 
 if getivals:
     ivals = {}
@@ -177,7 +177,7 @@ if norm_val == 1 or norm_max == 1:
 else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
-            title= ' ' + ' ',
+            title= '6 ppm = 1.58 (1.41)' + ' 63 ppm = 2.46 (3.54)' + ' 127 ppm = 2.56 (2.59)',
             xlim=[200, 700],
             #ylim = [0,4000]
             )
@@ -188,8 +188,8 @@ plt.show()
 
 #------------something1
 if something:
-    n_str1 = '0_05(19)'
-    n_str2 = '1(19)'
+    n_str1 = 'DMA 127 ppm (5d)'
+    n_str2 = 'DMA 127 ppm (5d)'
     for itm in data[n_str1]:
         y = data[n_str1][itm]
 
@@ -202,11 +202,13 @@ if something:
     min_idx = [i for i, x in enumerate(y) if x == abs_min]
     print('min_idx: ' + str(min_idx))
     abs_val = abs_max - abs_min
-    print(abs_val)
+    print('abs_val = ' + str(abs_val))
     #val1 = (abs_val - 526.6857) / 20.6157
     val1 = (abs_val - 434.2891) / 27.758
 
-    print(val1)
+    print('val1 = ' + str(val1))
+
+    d_abs = 3093.9285714285725 / 1194.2666666666673
 
     # dma : -19.2904291389572
     # dmz : 2.2743317241876073
@@ -218,6 +220,14 @@ if something:
     val2 = (yi - 402769.829) / 42837.715
     print(yi)
     print(val2)
+
+    for itm in ivals[n_str1]:
+        alpha1 = ivals[n_str1][itm]
+    for itm in ivals[n_str2]:
+        alpha2 = ivals[n_str2][itm]
+    d_alpha = alpha1 / alpha2
+    print('d_alpha = ' + str(d_alpha))
+    print('d_abs = ' + str(d_abs))
 
     # dma: -9.392502533416414
     # dmz: 0.8360391671217748
@@ -381,8 +391,6 @@ if fitting:
     ax2.text(max_conc - max_conc / 8, conc1, r'$R^2$' + ' = ' + np.array2string(r2, precision=3), fontsize=24)
 
     plt.show()
-
-
 #--------------
 #----- for lods
 std = np.std(list(ivals['SeaWater'].values()))
@@ -390,7 +398,7 @@ std = np.std(list(ivals['SeaWater'].values()))
 def func(x, a, b):
     return a*x+b
 
-# 19 - 127.1 , 130 - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
+# 19(dma) - 127.1 , 130(dmz) - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
 # rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4
 
 max_conc = 2.4
