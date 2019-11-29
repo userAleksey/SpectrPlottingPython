@@ -21,10 +21,10 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 0
-str1 = 'dma'
+do_save = 1
+str1 = 'dmz'
 rad_type = 'LED_278'
-day_of_exp = '08_08_2019'
+day_of_exp = '13_08_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -193,8 +193,8 @@ if do_save == 1:
     fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
 #------------something1
 if something:
-    n_str1 = 'DMA 127 ppm (5d)'
-    n_str2 = 'DMA 127 ppm (5d)'
+    n_str1 = '6.69 ppm'
+    n_str2 = '6.69 ppm'
     for itm in data[n_str1]:
         y = data[n_str1][itm]
 
@@ -405,11 +405,17 @@ conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 std = np.std(list(ivals['Sea Water'].values()))
 
-conc1 = np.mean(list(ivals['6.7 ppm'].values()))
-conc2 = np.mean(list(ivals['13.4 ppm'].values()))
-conc3 = np.mean(list(ivals['26.8 ppm'].values()))
-conc4 = np.mean(list(ivals['66.9 ppm'].values()))
-conc5 = np.mean(list(ivals['133.9 ppm'].values()))
+conc1 = 238.26666666666665
+conc2 = 339.1666666666665
+conc3 = 803.4666666666672
+conc4 = 1478.9000000000015
+conc5 = 3093.166666666666
+
+#conc1 = np.mean(list(ivals['6.7 ppm'].values()))
+#conc2 = np.mean(list(ivals['13.4 ppm'].values()))
+#conc3 = np.mean(list(ivals['26.8 ppm'].values()))
+#conc4 = np.mean(list(ivals['66.9 ppm'].values()))
+#conc5 = np.mean(list(ivals['133.9 ppm'].values()))
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
@@ -447,7 +453,8 @@ if lod_legend == 1:
     ax2.legend([ np.array2string(coefs[0], precision = 3)+ ' * x + ' + np.array2string(coefs[1], precision = 3) ,'data'], loc=0)
 
 ax2.set(xlabel='Concentration, mg/l',
-        ylabel=r'$\alpha$',
+        #ylabel=r'$\alpha$',
+        ylabel=r'$\epsilon$',
         title= '' ,
         #       ylim = [0,1]
         )
@@ -455,7 +462,7 @@ ax2.set(xlabel='Concentration, mg/l',
 ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 #ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
 ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + '0.99', fontsize=24)
-ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+#ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
     fig2.savefig(sna + '_' +'1' + '.png', transparent=False, dpi=300, bbox_inches="tight")
