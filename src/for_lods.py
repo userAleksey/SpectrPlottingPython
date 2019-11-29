@@ -18,12 +18,15 @@ import datetime
 
 from somedataproc import managedata, processdata
 
+def func(x, a, b):
+    return a*x+b
+
 do_save = 0
 str1 = 'dma'
 rad_type = 'LED_278'
-day_of_exp = '20_11_2019'
+day_of_exp = '08_08_2019'
 
-datapath = join('..', 'data', day_of_exp, 'for plotting')
+datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
 getivals = 1
 norm_max = 0
@@ -133,7 +136,7 @@ for itm in data:
         if itm == 'DMA 127 ppm (5d)':
             ax1.plot(wl, data[itm][itm2], '--g')
             continue
-        ax1.plot(wl, data[itm][itm2])
+        ax1.plot(wl, data[itm][itm2], linewidth=4)
 
 #if legend == 1:
 #    ax1.legend(list(data.keys()), loc=2)
@@ -177,8 +180,8 @@ if norm_val == 1 or norm_max == 1:
 else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
-            title= '6 ppm = 1.58 (1.41)' + ' 63 ppm = 2.46 (3.54)' + ' 127 ppm = 2.56 (2.59)',
-            xlim=[200, 700],
+            title= ' ' + ' ',
+            xlim=[250, 700],
             #ylim = [0,4000]
             )
 
@@ -186,6 +189,8 @@ else:
 ax1.ticklabel_format(axis='y', style='sci', scilimits=(3,3))
 plt.show()
 
+if do_save == 1:
+    fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
 #------------something1
 if something:
     n_str1 = 'DMA 127 ppm (5d)'
@@ -233,9 +238,6 @@ if something:
     # dmz: 0.8360391671217748
     # dma + dmz: -3.0903133154978044
 #-----------------------------------
-
-if do_save == 1:
-    fig.savefig(sna + '.png', transparent=False, dpi=300, bbox_inches="tight")
 
 #----- fitting
 if fitting:
@@ -365,9 +367,6 @@ if fitting:
     conc1 = 3344.02459665 - 2926.1040740740746
 
 
-    def func(x, a, b):
-        return a * x + b
-
     max_conc = 127.1
     conc_vals = [max_conc / 20, max_conc / 10, max_conc / 5, max_conc / 2., max_conc]
     coefs, pcov = curve_fit(func, conc_vals, [conc1, conc2, conc3, conc4, conc5])
@@ -392,32 +391,31 @@ if fitting:
 
     plt.show()
 #--------------
-#----- for lods
-std = np.std(list(ivals['SeaWater'].values()))
 
-def func(x, a, b):
-    return a*x+b
+#----- for lods
 
 # 19(dma) - 127.1 , 130(dmz) - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
 # rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4
 
-max_conc = 2.4
+
+
+max_conc = 133.9
 conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 
-conc1 = np.mean(list(ivals['0.12 ppm'].values()))
-conc2 = np.mean(list(ivals['0.24 ppm'].values()))
-conc3 = np.mean(list(ivals['0.48 ppm'].values()))
-conc4 = np.mean(list(ivals['1.2 ppm'].values()))
-conc5 = np.mean(list(ivals['2.4 ppm'].values()))
+std = np.std(list(ivals['Sea Water'].values()))
+
+conc1 = np.mean(list(ivals['6.7 ppm'].values()))
+conc2 = np.mean(list(ivals['13.4 ppm'].values()))
+conc3 = np.mean(list(ivals['26.8 ppm'].values()))
+conc4 = np.mean(list(ivals['66.9 ppm'].values()))
+conc5 = np.mean(list(ivals['133.9 ppm'].values()))
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
 #conc8 = np.mean(list(ivals['19.2(RMB80)'].values()))
 #conc9 = np.mean(list(ivals['48(RMB80)'].values()))
 #conc10 = np.mean(list(ivals['96(RMB80)'].values()))
-
-
 
 #max_conc2 = 96
 #conc_vals2 = [max_conc2/20, max_conc2/10, max_conc2/5, max_conc2/2., max_conc2]
@@ -442,7 +440,7 @@ y_lod = func(lod, *coefs)
 ax2.scatter(conc_vals, [conc1,conc2,conc3,conc4,conc5], color='b')
 #ax2.scatter(conc_vals2, [conc6,conc7,conc8,conc9,conc10], color='g')
 
-ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-')
+ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-', linewidth=2.0)
 #ax2.plot(conc_vals2, func(np.array(conc_vals2), *coefs2), 'k-')
 
 if lod_legend == 1:
@@ -450,12 +448,13 @@ if lod_legend == 1:
 
 ax2.set(xlabel='Concentration, mg/l',
         ylabel=r'$\alpha$',
-        title=str1,
+        title= '' ,
         #       ylim = [0,1]
         )
 
 ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
-ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
+#ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
+ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + '0.99', fontsize=24)
 ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
 if do_save == 1:
