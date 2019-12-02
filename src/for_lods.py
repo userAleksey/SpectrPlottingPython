@@ -21,10 +21,11 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 1
-str1 = 'dmz'
+do_save = 0
+str1 = 'dma2'
+str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = '13_08_2019'
+day_of_exp = '02_12_2019(Probes of 29_11)'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -38,7 +39,7 @@ lod_legend = 0
 average = 1
 dyax = 0
 fitting = 0
-something = 1
+something = 0
 
 if getivals:
     ivals = {}
@@ -57,15 +58,15 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir,rad_type + '_' + str1 + '_0')
+sna = join(res_dir,rad_type + '_' + str1 + str2)
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
 
 # ----------------------------------------------------
-for itm in listdir(datapath):
+for itm in listdir(join(datapath, '..' )):
     if itm.endswith(".txt"):
-        wl = np.loadtxt(join(datapath, itm ), dtype=np.str, usecols=0, skiprows=17, comments='>')
+        wl = np.loadtxt(join(datapath, '..', itm ), dtype=np.str, usecols=0, skiprows=17, comments='>')
         #wl = np.loadtxt(join(datapath, itm ), dtype=np.str, usecols=0, comments='>')
 wl = np.char.replace(wl, ',', '.').astype(np.float64)
 
@@ -114,6 +115,9 @@ if dyax == 1:
 
 fig.set_tight_layout(True)
 
+for itm in data['seawater']:
+    backgroundsignal = data['seawater'][itm]
+
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
         continue
@@ -142,8 +146,17 @@ for itm in data:
 #    ax1.legend(list(data.keys()), loc=2)
 
 if legend == 1:
+    legendset1 = []
+    for itm in list(data.keys()):
+        if itm.find(' mcm') != -1:
+            test1 = itm.replace('mc', r'$\mu$')
+            legendset1.append(test1)
+        else:
+            legendset1.append(itm)
+
     #ax1.legend(['DMA','DMA film (80 '+ r'$\mu$' + 'm)','DMA solution (127.1 ppm)'], loc=1)
-    ax1.legend(list(data.keys()), loc=1)
+    #ax1.legend(list(data.keys()), loc=1)
+    ax1.legend(legendset1, loc=1)
 
 if dyax == 1:
     for itm in data:
@@ -181,8 +194,8 @@ else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[250, 700],
-            #ylim = [0,4000]
+            xlim=[340, 600],
+            ylim = [4.0,1200]
             )
 
 
