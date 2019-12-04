@@ -21,11 +21,11 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 0
-str1 = 'dma2'
+do_save = 1
+str1 = 'diesel'
 str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = '02_12_2019(Probes of 29_11)'
+day_of_exp = '04_12_2019'
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -118,6 +118,9 @@ fig.set_tight_layout(True)
 for itm in data['seawater']:
     backgroundsignal = data['seawater'][itm]
 
+for itm in data['seawater20']:
+    backgroundsignal2 = data['seawater20'][itm]
+
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
         continue
@@ -137,10 +140,12 @@ for itm in data:
         if itm == 'DMA 127 ppm':
             ax1.plot(wl, data[itm][itm2], 'g')
             continue
-        if itm == 'DMA 127 ppm (5d)':
-            ax1.plot(wl, data[itm][itm2], '--g')
+        if itm == 'seawater' or itm == 'seawater20':
             continue
-        ax1.plot(wl, data[itm][itm2], linewidth=4)
+        if itm == '20 mcm':
+            ax1.plot(wl, data[itm][itm2] - backgroundsignal2, linewidth=4)
+            continue
+        ax1.plot(wl, data[itm][itm2] - backgroundsignal, linewidth=4)
 
 #if legend == 1:
 #    ax1.legend(list(data.keys()), loc=2)
@@ -151,8 +156,8 @@ if legend == 1:
         if itm.find(' mcm') != -1:
             test1 = itm.replace('mc', r'$\mu$')
             legendset1.append(test1)
-        else:
-            legendset1.append(itm)
+        #else:
+        #    legendset1.append(itm)
 
     #ax1.legend(['DMA','DMA film (80 '+ r'$\mu$' + 'm)','DMA solution (127.1 ppm)'], loc=1)
     #ax1.legend(list(data.keys()), loc=1)
@@ -194,8 +199,8 @@ else:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[340, 600],
-            ylim = [4.0,1200]
+            xlim=[340, 550],
+            ylim = [0,1000]
             )
 
 
