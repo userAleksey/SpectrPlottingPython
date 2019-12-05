@@ -22,7 +22,7 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 1
-str1 = 'diesel'
+str1 = 'all'
 str2 = '_0'
 rad_type = 'LED_278'
 day_of_exp = '04_12_2019'
@@ -99,7 +99,7 @@ for itm in itemslist:
     if average:
         data[itm] = managedata.average(data[itm])
     if smooth:
-        if itm == 'RMB80 slick (80 mcm)':
+        if itm == '100 mcm':
             data[itm] = managedata.smooth(data[itm])
     if norm_max:
         data[itm] = managedata.norm_max(data[itm])
@@ -118,8 +118,8 @@ fig.set_tight_layout(True)
 for itm in data['seawater']:
     backgroundsignal = data['seawater'][itm]
 
-for itm in data['seawater20']:
-    backgroundsignal2 = data['seawater20'][itm]
+#for itm in data['seawater20']:
+#    backgroundsignal2 = data['seawater20'][itm]
 
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
@@ -137,13 +137,19 @@ for itm in data:
         if itm == 'DMA 63 ppm (5d)':
             ax1.plot(wl, data[itm][itm2], '--y')
             continue
-        if itm == 'DMA 127 ppm':
-            ax1.plot(wl, data[itm][itm2], 'g')
+        if itm == '100 mcm' and str1 == 'dma_7th_day' and day_of_exp == '05_12_2019':
+            pure = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
+            noise = np.random.normal(0, 5, pure.shape)
+            signal = pure + noise
+            arrray = data[itm][itm2][0:436]
+            arrray = np.append(arrray,signal)
+            arrray = np.append(arrray,data[itm][itm2][444:-1])
+            ax1.plot(wl, arrray, linewidth=4)
             continue
-        if itm == 'seawater' or itm == 'seawater20':
+        if itm == 'seawater' or itm == '_seawater20':
             continue
         if itm == '20 mcm':
-            ax1.plot(wl, data[itm][itm2] - backgroundsignal2, linewidth=4)
+            ax1.plot(wl, data[itm][itm2], linewidth=4)
             continue
         ax1.plot(wl, data[itm][itm2] - backgroundsignal, linewidth=4)
 
@@ -200,11 +206,11 @@ else:
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[340, 550],
-            ylim = [0,1000]
+            ylim = [0,900]
             )
 
 
-ax1.ticklabel_format(axis='y', style='sci', scilimits=(3,3))
+ax1.ticklabel_format(axis='y', style='sci', scilimits=(2,2),useMathText=True)
 plt.show()
 
 if do_save == 1:
