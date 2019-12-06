@@ -23,9 +23,14 @@ def func(x, a, b):
 
 do_save = 1
 str1 = 'all'
-str2 = '_0'
+str2 = '_1'
 rad_type = 'LED_278'
-day_of_exp = '04_12_2019'
+day_of_exp = '06_12_2019'
+xlim1 = [340, 550]
+
+xmin = 340
+xmax = 550
+
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -76,6 +81,8 @@ wl = np.char.replace(wl, ',', '.').astype(np.float64)
 #    if i % 2 == 0:
 #        wl2.append(wl[i])
 #wl = wl2
+
+xlims_idxs = [i for i, x in enumerate(wl) if x > xmin and x < xmax]
 
 if getivals:
     idxs = [i for i, x in enumerate(wl) if x > lim1 and x < lim2]
@@ -146,12 +153,13 @@ for itm in data:
             arrray = np.append(arrray,data[itm][itm2][444:-1])
             ax1.plot(wl, arrray, linewidth=4)
             continue
-        if itm == 'seawater' or itm == '_seawater20':
+        if itm == '_seawater' or itm == '_seawater20':
             continue
         if itm == '20 mcm':
             ax1.plot(wl, data[itm][itm2], linewidth=4)
             continue
-        ax1.plot(wl, data[itm][itm2] - backgroundsignal, linewidth=4)
+        data[itm][itm2] = data[itm][itm2] - 0
+        ax1.plot(wl, data[itm][itm2], linewidth=4)
 
 #if legend == 1:
 #    ax1.legend(list(data.keys()), loc=2)
@@ -162,8 +170,8 @@ if legend == 1:
         if itm.find(' mcm') != -1:
             test1 = itm.replace('mc', r'$\mu$')
             legendset1.append(test1)
-        #else:
-        #    legendset1.append(itm)
+        else:
+            legendset1.append(itm)
 
     #ax1.legend(['DMA','DMA film (80 '+ r'$\mu$' + 'm)','DMA solution (127.1 ppm)'], loc=1)
     #ax1.legend(list(data.keys()), loc=1)
@@ -202,11 +210,16 @@ if norm_val == 1 or norm_max == 1:
             ylim=[0, 1]
             )
 else:
+    allymax = []
+    for itm1 in data:
+        for itm2 in data[itm1]:
+            allymax.append(max(data[itm1][itm2][xlims_idxs[0]:xlims_idxs[-1]]))
+    ymax1 = max(allymax)
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[340, 550],
-            ylim = [0,900]
+            xlim=xlim1,
+            ylim = [0, ymax1]
             )
 
 
