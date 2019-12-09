@@ -224,6 +224,7 @@ else:
 
 
 ax1.ticklabel_format(axis='y', style='sci', scilimits=(2,2),useMathText=True)
+ax1.yaxis.offsetText.set_visible(False)
 plt.show()
 
 if do_save == 1:
