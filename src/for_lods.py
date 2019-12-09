@@ -155,11 +155,11 @@ for itm in data:
             continue
         if itm == 'seawater' or itm == 'seawater20':
             continue
-        if itm == 'dma_3d 20 mcm':
+        if itm == '20 mcm 3 day':
             ax1.plot(wl, data[itm][itm2] - backgroundsignal2, linewidth=4)
             continue
         if itm == 'DMA':
-            #ax1.plot(wl, data[itm][itm2], '--k', linewidth=4)
+            ax1.plot(wl[0:10], data[itm][itm2][0:10], '--k', linewidth=4)
             continue
         data[itm][itm2] = data[itm][itm2] - backgroundsignal
         ax1.plot(wl, data[itm][itm2], linewidth=4)
@@ -170,6 +170,8 @@ for itm in data:
 if legend == 1:
     legendset1 = []
     for itm in list(data.keys()):
+        if itm == '_DMA':
+            continue
         if itm.find(' mcm') != -1:
             test1 = itm.replace('mc', r'$\mu$')
             legendset1.append(test1)
@@ -201,15 +203,15 @@ if dyax == 1:
     #if legend == 1:
         #ax2.legend(list(data.keys()), loc=0, bbox_to_anchor=(0.5, 0., 0.5, 0.8))
         #ax2.legend(list(data.keys())[4:8], loc=1)
-     #   ax2.legend([' '], loc=1)
+        #ax2.legend(['yyy'])
 
     ax2.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[100, 600],
-            #   ylim = [0,5000]
+               ylim = [0,10000]
             )
-    ax2.ticklabel_format(axis='y', style='sci', scilimits=(2, 2), useMathText=True)
+    ax2.ticklabel_format(axis='y', style='sci', scilimits=(3,3), useMathText=True)
     ax2.yaxis.offsetText.set_visible(False)
 if norm_val == 1 or norm_max == 1:
     ax1.set(xlabel='Wavelength, nm',
