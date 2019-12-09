@@ -22,14 +22,14 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 1
-str1 = 'all'
-str2 = '_1'
+str1 = 'fig_4.8a'
+str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = '06_12_2019'
-xlim1 = [340, 550]
+day_of_exp = '09_12_2019'
+xlim1 = [340, 600]
 
 xmin = 340
-xmax = 550
+xmax = 600
 
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
@@ -42,7 +42,7 @@ backgroundless = 0
 legend = 1
 lod_legend = 0
 average = 1
-dyax = 0
+dyax = 1
 fitting = 0
 something = 0
 
@@ -125,8 +125,8 @@ fig.set_tight_layout(True)
 for itm in data['seawater']:
     backgroundsignal = data['seawater'][itm]
 
-#for itm in data['seawater20']:
-#    backgroundsignal2 = data['seawater20'][itm]
+for itm in data['seawater20']:
+    backgroundsignal2 = data['seawater20'][itm]
 
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
@@ -153,12 +153,15 @@ for itm in data:
             arrray = np.append(arrray,data[itm][itm2][444:-1])
             ax1.plot(wl, arrray, linewidth=4)
             continue
-        if itm == '_seawater' or itm == '_seawater20':
+        if itm == 'seawater' or itm == 'seawater20':
             continue
-        if itm == '20 mcm':
-            ax1.plot(wl, data[itm][itm2], linewidth=4)
+        if itm == 'dma_3d 20 mcm':
+            ax1.plot(wl, data[itm][itm2] - backgroundsignal2, linewidth=4)
             continue
-        data[itm][itm2] = data[itm][itm2] - 0
+        if itm == 'DMA':
+            #ax1.plot(wl, data[itm][itm2], '--k', linewidth=4)
+            continue
+        data[itm][itm2] = data[itm][itm2] - backgroundsignal
         ax1.plot(wl, data[itm][itm2], linewidth=4)
 
 #if legend == 1:
@@ -191,27 +194,35 @@ if dyax == 1:
         if itm == 'crude oil':
             for itm2 in data[itm]:
                 ax2.plot(wl, data[itm][itm2], 'k-')
-    if legend == 1:
-        # ax2.legend(list(data.keys()), loc=0, bbox_to_anchor=(0.5, 0., 0.5, 0.8))
+        if itm == 'DMA':
+            for itm2 in data[itm]:
+                ax2.plot(wl, data[itm][itm2], '--k', linewidth=4)
+
+    #if legend == 1:
+        #ax2.legend(list(data.keys()), loc=0, bbox_to_anchor=(0.5, 0., 0.5, 0.8))
         #ax2.legend(list(data.keys())[4:8], loc=1)
-        ax2.legend(['127.1 mg/l'], loc=1)
+     #   ax2.legend([' '], loc=1)
 
     ax2.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
-            title=rad_type + ' ',
-            xlim=[100, 700],
+            title= ' ' + ' ',
+            xlim=[100, 600],
             #   ylim = [0,5000]
             )
+    ax2.ticklabel_format(axis='y', style='sci', scilimits=(2, 2), useMathText=True)
+    ax2.yaxis.offsetText.set_visible(False)
 if norm_val == 1 or norm_max == 1:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[250, 600],
+            xlim=[250, 900],
             ylim=[0, 1]
             )
 else:
     allymax = []
     for itm1 in data:
+        if itm1 == 'DMA':
+            continue
         for itm2 in data[itm1]:
             allymax.append(max(data[itm1][itm2][xlims_idxs[0]:xlims_idxs[-1]]))
     ymax1 = max(allymax)
@@ -222,9 +233,11 @@ else:
             ylim = [0, ymax1]
             )
 
+    ax1.ticklabel_format(axis='y', style='sci', scilimits=(2, 2), useMathText=True)
+    ax1.yaxis.offsetText.set_visible(False)
 
-ax1.ticklabel_format(axis='y', style='sci', scilimits=(2,2),useMathText=True)
-ax1.yaxis.offsetText.set_visible(False)
+
+
 plt.show()
 
 if do_save == 1:
