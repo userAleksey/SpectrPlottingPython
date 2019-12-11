@@ -19,18 +19,18 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 1
-str1 = 'all_10mcm'
+do_save = 0
+str1 = 'fig_2.5a'
 str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = '09_12_2019'
+day_of_exp = 'statiya'
 
-xmin = 340
-xmax = 600
+xmin = 250
+xmax = 700
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
-getivals = 1
+getivals = 0
 norm_max = 0
 norm_val = 0
 smooth = 1
@@ -41,6 +41,7 @@ average = 1
 dyax = 0
 fitting = 0
 something = 0
+subrel = 0
 
 if getivals:
     ivals = {}
@@ -65,18 +66,26 @@ if not isdir(res_dir):
     makedirs(abspath(res_dir))
 
 # ----------------------------------------------------
-for itm in listdir(join(datapath, '..' )):
-    if itm.endswith(".txt"):
-        wl = np.loadtxt(join(datapath, '..', itm ), dtype=np.str, usecols=0, skiprows=17, comments='>')
-        #wl = np.loadtxt(join(datapath, itm ), dtype=np.str, usecols=0, comments='>')
+#for itm in listdir(join(datapath, '..' )):
+for itm in listdir(datapath):
+    for itm2 in listdir(join(datapath,itm)):
+        if itm2.endswith(".txt"):
+            wl = np.loadtxt(join(datapath, itm, itm2 ), dtype=np.str, usecols=0, skiprows=17, comments='>')
+            break
+        if itm2.endswith(".tif") or itm2.endswith(".tiff"):
+            wl = np.loadtxt(join(datapath, '..', 'wavelengths'), dtype=np.str, usecols=0, comments='>')
+            tifs = 1
+            break
+    if 'wl' in locals():
+        break
 wl = np.char.replace(wl, ',', '.').astype(np.float64)
 
-# for tifs
-#wl2 = []
-#for i in range(len(wl)):
-#    if i % 2 == 0:
-#        wl2.append(wl[i])
-#wl = wl2
+if 'tifs' in locals():
+    wl2 = []
+    for i in range(len(wl)):
+        if i % 2 == 0:
+            wl2.append(wl[i])
+    wl = wl2
 
 xlims_idxs = [i for i, x in enumerate(wl) if x > xmin and x < xmax]
 
@@ -102,13 +111,12 @@ for itm in itemslist:
     if average:
         data[itm] = managedata.average(data[itm])
     if smooth:
-        if itm == 'RMB30 80 mcm':
+        if itm == 'RMB30 slick (80 mcm)':
             data[itm] = managedata.smooth(data[itm])
     if norm_max:
         data[itm] = managedata.norm_max(data[itm])
     if norm_val:
         data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
-
 
 # ----------------------------------------------------
 
@@ -118,14 +126,12 @@ if dyax == 1:
 
 fig.set_tight_layout(True)
 
-for itm in data['seawater']:
-    backgroundsignal = data['seawater'][itm]
+if subrel == 1:
+    for itm in data['seawater']:
+        backgroundsignal = data['seawater'][itm]
+    for itm in data['seawater20']:
+        backgroundsignal2 = data['seawater20'][itm]
 
-#for itm in data['seawater20']:
-#    backgroundsignal2 = data['seawater20'][itm]
-
-minusrel = 0
-if minusrel == 1:
     for itm in data:
         if itm == 'seawater':
             continue
@@ -222,7 +228,7 @@ if dyax == 1:
     ax2.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[100, 600],
+            xlim=[xmin, xmax],
                ylim = [0,350]
             )
     ax2.ticklabel_format(axis='y', style='sci', scilimits=(2,2), useMathText=True)
@@ -232,7 +238,7 @@ if norm_val == 1 or norm_max == 1:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
-            xlim=[320, 600],
+            xlim=[xmin, xmax],
             ylim=[0, 1]
             )
 else:
@@ -251,8 +257,8 @@ else:
             #ylim = [0, 1]
             )
 
-    ax1.ticklabel_format(axis='y', style='sci', scilimits=(2, 2), useMathText=True)
-   # ax1.yaxis.offsetText.set_visible(False)
+    ax1.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
+    ax1.yaxis.offsetText.set_visible(False)
 
 plt.show()
 
