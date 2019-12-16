@@ -20,20 +20,20 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'fig_2.5a'
+str1 = 'fig_2.4b'
 str2 = '_0'
 rad_type = 'LED_278'
 day_of_exp = 'statiya'
 
 xmin = 250
-xmax = 700
+xmax = 900
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
-getivals = 0
+getivals = 1
 norm_max = 0
 norm_val = 0
-smooth = 1
+smooth = 0
 backgroundless = 0
 legend = 1
 lod_legend = 0
@@ -41,15 +41,16 @@ average = 1
 dyax = 0
 fitting = 0
 something = 0
-subrel = 0
+subrel = 1
+normalize = 1
 
 if getivals:
     ivals = {}
     lim1 = 300
     lim2 = 525
 
-if norm_val:
-    nlim1 = 320
+if norm_val or normalize:
+    nlim1 = 325
     nlim2 = 600
 
 font = {'family': 'normal',
@@ -66,7 +67,6 @@ if not isdir(res_dir):
     makedirs(abspath(res_dir))
 
 # ----------------------------------------------------
-#for itm in listdir(join(datapath, '..' )):
 for itm in listdir(datapath):
     for itm2 in listdir(join(datapath,itm)):
         if itm2.endswith(".txt"):
@@ -92,7 +92,7 @@ xlims_idxs = [i for i, x in enumerate(wl) if x > xmin and x < xmax]
 if getivals:
     idxs = [i for i, x in enumerate(wl) if x > lim1 and x < lim2]
 
-if norm_val:
+if norm_val or normalize:
     n_idxs = [i for i, x in enumerate(wl) if x > nlim1 and x < nlim2]
 
 data = {}
@@ -104,7 +104,6 @@ itemslist = managedata.natural_sort(itemslist)
 for itm in itemslist:
     if not isdir(join(datapath,itm)):
         continue
-    #data[itm] = managedata.load_data(join('..', 'data', day_of_exp, itm))
     data[itm] = managedata.load_data(join(datapath, itm))
     if getivals:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
@@ -129,24 +128,25 @@ fig.set_tight_layout(True)
 if subrel == 1:
     for itm in data['seawater']:
         backgroundsignal = data['seawater'][itm]
-    for itm in data['seawater20']:
-        backgroundsignal2 = data['seawater20'][itm]
+    #for itm in data['seawater20']:
+    #    backgroundsignal2 = data['seawater20'][itm]
 
     for itm in data:
         if itm == 'seawater':
             continue
-        if itm == 'RMB30 80 mcm':
+        if itm == '_RMB30 80 mcm':
             data[itm] = managedata.norm_val(data[itm], wl, xlims_idxs)
             continue
-        for itm2 in data[itm]:
-            data[itm][itm2] = data[itm][itm2] - backgroundsignal
+        if itm == 'DMA slick (100 mcm) 3 days':
+            for itm2 in data[itm]:
+                data[itm][itm2] = data[itm][itm2] - backgroundsignal
 
-normalize = 0
+
 if normalize == 1:
     for itm in data:
         if itm == 'seawater' or itm == 'RMB30 (80 mcm)':
             continue
-        data[itm] = managedata.norm_val(data[itm], wl, xlims_idxs)
+        data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
 
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
@@ -173,7 +173,7 @@ for itm in data:
             arrray = np.append(arrray,data[itm][itm2][444:-1])
             ax1.plot(wl, arrray  - 0, linewidth=4)
             continue
-        if itm == '_seawater' or itm == '_seawater20':
+        if subrel == 1 and itm == 'seawater' or itm == 'seawater20':
             continue
         if itm == '20 mcm':
             ax1.plot(wl, data[itm][itm2] - 0, linewidth=4)
@@ -192,14 +192,14 @@ if legend == 1:
     for itm in list(data.keys()):
         if itm == '_DMA':
             continue
+        if itm.find(' 3 days') != -1:
+            itm = itm.replace(' 3 days', ' ')
         if itm.find(' mcm') != -1:
             test1 = itm.replace('mc', r'$\mu$')
             legendset1.append(test1)
         else:
             legendset1.append(itm)
 
-    #ax1.legend(['DMA','DMA film (80 '+ r'$\mu$' + 'm)','DMA solution (127.1 ppm)'], loc=1)
-    #ax1.legend(list(data.keys()), loc=1)
     ax1.legend(legendset1, loc=0,fancybox=True, facecolor='white')
 
 if dyax == 1:
@@ -234,7 +234,7 @@ if dyax == 1:
     ax2.ticklabel_format(axis='y', style='sci', scilimits=(2,2), useMathText=True)
     ax2.yaxis.offsetText.set_visible(False)
     ax1.legend(legendset1, loc=5, fancybox=True)
-if norm_val == 1 or norm_max == 1:
+if norm_val == 1 or norm_max == 1 or normalize:
     ax1.set(xlabel='Wavelength, nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
@@ -472,23 +472,23 @@ if fitting:
 
 
 
-max_conc = 133.9
+max_conc = 127.1
 conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 
 std = np.std(list(ivals['Sea Water'].values()))
 
-conc1 = 238.26666666666665
-conc2 = 339.1666666666665
-conc3 = 803.4666666666672
-conc4 = 1478.9000000000015
-conc5 = 3093.166666666666
+#conc1 = 238.26666666666665
+#conc2 = 339.1666666666665
+#conc3 = 803.4666666666672
+#conc4 = 1478.9000000000015
+#conc5 = 3093.166666666666
 
-#conc1 = np.mean(list(ivals['6.7 ppm'].values()))
-#conc2 = np.mean(list(ivals['13.4 ppm'].values()))
-#conc3 = np.mean(list(ivals['26.8 ppm'].values()))
-#conc4 = np.mean(list(ivals['66.9 ppm'].values()))
-#conc5 = np.mean(list(ivals['133.9 ppm'].values()))
+conc1 = np.mean(list(ivals['6.3 ppm'].values()))
+conc2 = np.mean(list(ivals['12.7 ppm'].values()))
+conc3 = np.mean(list(ivals['25.4 ppm'].values()))
+conc4 = np.mean(list(ivals['63.5 ppm'].values()))
+conc5 = np.mean(list(ivals['127 ppm'].values()))
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
