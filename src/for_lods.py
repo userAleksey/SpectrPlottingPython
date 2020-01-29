@@ -20,13 +20,13 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'fig_2.4b'
+str1 = 'fig_12'
 str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = 'statiya'
+day_of_exp = 'statiyav2'
 
 xmin = 250
-xmax = 900
+xmax = 600
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -110,8 +110,10 @@ for itm in itemslist:
     if average:
         data[itm] = managedata.average(data[itm])
     if smooth:
-        if itm == 'RMB30 slick (80 mcm)':
+        if itm == 'RMB30 slick (80 mcm)' or itm == 'DMA slick (100 mcm) 3 days':
             data[itm] = managedata.smooth(data[itm])
+            for itm2 in data[itm]:
+                data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.4
     if norm_max:
         data[itm] = managedata.norm_max(data[itm])
     if norm_val:
@@ -119,7 +121,7 @@ for itm in itemslist:
 
 # ----------------------------------------------------
 
-fig, (ax1) = plt.subplots(1, 1, figsize=(18, 10))
+fig, (ax1) = plt.subplots(1, 1, figsize=(19, 11))
 if dyax == 1:
     ax2 = ax1.twinx()
 
@@ -200,7 +202,7 @@ if legend == 1:
         else:
             legendset1.append(itm)
 
-    ax1.legend(legendset1, loc=0,fancybox=True, facecolor='white')
+    ax1.legend(legendset1, loc=0,fancybox=True, facecolor='white', frameon=False)
 
 if dyax == 1:
     for itm in data:
@@ -241,6 +243,14 @@ if norm_val == 1 or norm_max == 1 or normalize:
             xlim=[xmin, xmax],
             ylim=[0, 1]
             )
+    for tick in ax1.yaxis.get_majorticklabels():
+        tick.set_verticalalignment("bottom")
+
+
+
+    #ax1.set_xticks([250,300,400,500,600,700,800])
+    ax1.set_xticks([250,300,400,500,600])
+
 else:
     allymax = []
     for itm1 in data:
