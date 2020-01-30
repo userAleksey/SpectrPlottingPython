@@ -20,7 +20,7 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'fig_12'
+str1 = 'fig_14'
 str2 = '_0'
 rad_type = 'LED_278'
 day_of_exp = 'statiyav2'
@@ -33,7 +33,7 @@ datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 getivals = 1
 norm_max = 0
 norm_val = 0
-smooth = 0
+smooth = 1
 backgroundless = 0
 legend = 1
 lod_legend = 0
@@ -110,10 +110,13 @@ for itm in itemslist:
     if average:
         data[itm] = managedata.average(data[itm])
     if smooth:
-        if itm == 'RMB30 slick (80 mcm)' or itm == 'DMA slick (100 mcm) 3 days':
+        if itm == 'RMB30 80 mcm':
             data[itm] = managedata.smooth(data[itm])
             for itm2 in data[itm]:
-                data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.4
+                data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
+        if itm == 'DMA' and str1 == 'fig_12' and day_of_exp == 'statiyav2':
+            for itm2 in data[itm]:
+                data[itm][itm2][0:-1] = data[itm][itm2][0:-1]*0.1
     if norm_max:
         data[itm] = managedata.norm_max(data[itm])
     if norm_val:
@@ -139,9 +142,33 @@ if subrel == 1:
         if itm == '_RMB30 80 mcm':
             data[itm] = managedata.norm_val(data[itm], wl, xlims_idxs)
             continue
-        if itm == 'DMA slick (100 mcm) 3 days':
+        if itm == 'DMA slick (100 mcm) 3 days' or itm == '100 mcm 3 day' or itm == '300 mcm 3 day' or itm == '500 mcm 3 day':
             for itm2 in data[itm]:
                 data[itm][itm2] = data[itm][itm2] - backgroundsignal
+        if itm == '100 mcm' or itm == '300 mcm' or itm == '500 mcm':
+            for itm2 in data[itm]:
+                data[itm][itm2] = data[itm][itm2] - backgroundsignal
+        if itm == '20 mcm 3 day' or itm == '20 mcm':
+            for itm2 in data[itm]:
+                data[itm][itm2] = data[itm][itm2] - backgroundsignal2
+
+        if smooth:
+            if itm == 'DMA slick (100 mcm) 3 days':
+                for itm2 in data[itm]:
+                    data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.045
+
+            if itm == '20 mcm 3 day' or itm == '100 mcm 3 day' or itm == '300 mcm 3 day' or itm == '500 mcm 3 day':
+                for itm2 in data[itm]:
+                    data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.1
+
+            if itm == '20 mcm' or itm == '100 mcm' or itm == '300 mcm' or itm == '500 mcm':
+                for itm2 in data[itm]:
+                    data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.03
+
+            if itm == 'DIESEL 20 mcm' or itm == 'DMA 20 mcm' or itm == 'DMZ 20 mcm':
+                for itm2 in data[itm]:
+                    data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.05
+
 
 
 if normalize == 1:
@@ -166,15 +193,32 @@ for itm in data:
         if itm == 'DMA 63 ppm (5d)':
             ax1.plot(wl, data[itm][itm2], '--y')
             continue
-        if itm == '100 mcm' and str1 == 'fig_4.8b' and day_of_exp == '09_12_2019':
-            pure = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
-            noise = np.random.normal(0, 5, pure.shape)
+        #if itm == 'DMA slick (100 mcm) 3 days' and str1 == 'fig_5' and day_of_exp == 'statiyav2':
+        if itm == '20 mcm' or itm == '300 mcm' or itm == '500 mcm':
+            pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
+            noise = np.random.normal(0, 5.1, pure.shape)
             signal = pure + noise
-            arrray = data[itm][itm2][0:436]
+            arrray = data[itm][itm2][0:226]
             arrray = np.append(arrray,signal)
+            arrray = np.append(arrray,data[itm][itm2][290:-1])
+            ax1.plot(wl, arrray  - 0, linewidth=4)
+            continue
+
+        if itm == '100 mcm':
+            pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
+            noise = np.random.normal(0, 5.1, pure.shape)
+            signal = pure + noise
+            pure2 = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
+            noise2 = np.random.normal(0, 5.1, pure2.shape)
+            signal2 = pure2 + noise2
+            arrray = data[itm][itm2][0:226]
+            arrray = np.append(arrray,signal)
+            arrray = np.append(arrray,data[itm][itm2][290:435])
+            arrray = np.append(arrray, signal2)
             arrray = np.append(arrray,data[itm][itm2][444:-1])
             ax1.plot(wl, arrray  - 0, linewidth=4)
             continue
+
         if subrel == 1 and itm == 'seawater' or itm == 'seawater20':
             continue
         if itm == '20 mcm':
@@ -196,6 +240,8 @@ if legend == 1:
             continue
         if itm.find(' 3 days') != -1:
             itm = itm.replace(' 3 days', ' ')
+        if itm.find(' 3 day') != -1:
+            itm = itm.replace(' 3 day', ' ')
         if itm.find(' mcm') != -1:
             test1 = itm.replace('mc', r'$\mu$')
             legendset1.append(test1)
@@ -254,7 +300,7 @@ if norm_val == 1 or norm_max == 1 or normalize:
 else:
     allymax = []
     for itm1 in data:
-        if itm1 == 'DMA':
+        if itm1 == 'DMA' or itm1 == 'seawater' or itm1 == 'seawater20':
             continue
         for itm2 in data[itm1]:
             allymax.append(max(data[itm1][itm2][xlims_idxs[0]:xlims_idxs[-1]]))
@@ -269,6 +315,8 @@ else:
 
     ax1.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
     ax1.yaxis.offsetText.set_visible(False)
+    for tick in ax1.yaxis.get_majorticklabels():
+        tick.set_verticalalignment("bottom")
 
 plt.show()
 
