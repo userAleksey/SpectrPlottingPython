@@ -19,7 +19,7 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 0
+do_save = 1
 str1 = 'fig_14'
 str2 = '_0'
 rad_type = 'LED_278'
@@ -167,7 +167,18 @@ if subrel == 1:
 
             if itm == 'DIESEL 20 mcm' or itm == 'DMA 20 mcm' or itm == 'DMZ 20 mcm':
                 for itm2 in data[itm]:
-                    data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.05
+                    value = 0.015
+                    numcel = 0
+                    for itm3 in data[itm][itm2][0:270]:
+                        data[itm][itm2][numcel] = itm3 * value
+                        value = value + 0.000
+                        numcel = numcel + 1
+                    value = 0.015
+                    numcel = 0
+                    for itm3 in data[itm][itm2][270:350]:
+                        data[itm][itm2][270 + numcel] = itm3 * value
+                        value = value + 0.01
+                        numcel = numcel + 1
 
 
 
