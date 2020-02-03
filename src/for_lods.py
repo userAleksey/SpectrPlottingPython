@@ -19,7 +19,7 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 1
+do_save = 0
 str1 = 'fig_14'
 str2 = '_0'
 rad_type = 'LED_278'
@@ -114,6 +114,10 @@ for itm in itemslist:
             data[itm] = managedata.smooth(data[itm])
             for itm2 in data[itm]:
                 data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
+        if itm == 'RMB30 slick (80 mcm)':
+            data[itm] = managedata.smooth(data[itm])
+            for itm2 in data[itm]:
+                data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
         if itm == 'DMA' and str1 == 'fig_12' and day_of_exp == 'statiyav2':
             for itm2 in data[itm]:
                 data[itm][itm2][0:-1] = data[itm][itm2][0:-1]*0.1
@@ -134,7 +138,7 @@ if subrel == 1:
     for itm in data['seawater']:
         backgroundsignal = data['seawater'][itm]
     #for itm in data['seawater20']:
-    #    backgroundsignal2 = data['seawater20'][itm]
+    #        backgroundsignal2 = data['seawater20'][itm]
 
     for itm in data:
         if itm == 'seawater':
@@ -153,10 +157,6 @@ if subrel == 1:
                 data[itm][itm2] = data[itm][itm2] - backgroundsignal2
 
         if smooth:
-            if itm == 'DMA slick (100 mcm) 3 days':
-                for itm2 in data[itm]:
-                    data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.045
-
             if itm == '20 mcm 3 day' or itm == '100 mcm 3 day' or itm == '300 mcm 3 day' or itm == '500 mcm 3 day':
                 for itm2 in data[itm]:
                     data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.1
@@ -165,19 +165,19 @@ if subrel == 1:
                 for itm2 in data[itm]:
                     data[itm][itm2][0:255] = data[itm][itm2][0:255] * 0.03
 
-            if itm == 'DIESEL 20 mcm' or itm == 'DMA 20 mcm' or itm == 'DMZ 20 mcm':
+            if itm == 'DIESEL 20 mcm' or itm == 'DMA 20 mcm' or itm == 'DMZ 20 mcm' or itm == 'DMA slick (100 mcm) 3 days':
                 for itm2 in data[itm]:
                     value = 0.015
                     numcel = 0
-                    for itm3 in data[itm][itm2][0:270]:
+                    for itm3 in data[itm][itm2][0:250]:
                         data[itm][itm2][numcel] = itm3 * value
                         value = value + 0.000
                         numcel = numcel + 1
                     value = 0.015
                     numcel = 0
-                    for itm3 in data[itm][itm2][270:350]:
-                        data[itm][itm2][270 + numcel] = itm3 * value
-                        value = value + 0.01
+                    for itm3 in data[itm][itm2][250:290]:
+                        data[itm][itm2][250 + numcel] = itm3 * value
+                        value = value + 0.025
                         numcel = numcel + 1
 
 
@@ -294,8 +294,8 @@ if dyax == 1:
     ax2.yaxis.offsetText.set_visible(False)
     ax1.legend(legendset1, loc=5, fancybox=True)
 if norm_val == 1 or norm_max == 1 or normalize:
-    ax1.set(xlabel='Wavelength, nm',
-            ylabel='I, rel. un.',
+    ax1.set(xlabel=r'$\lambda$' + ', nm',
+            ylabel='I, norm',
             title= ' ' + ' ',
             xlim=[xmin, xmax],
             ylim=[0, 1]
@@ -305,8 +305,10 @@ if norm_val == 1 or norm_max == 1 or normalize:
 
 
 
-    #ax1.set_xticks([250,300,400,500,600,700,800])
-    ax1.set_xticks([250,300,400,500,600])
+    if xmax == 600:
+        ax1.set_xticks([250,300,400,500,600])
+    else:
+        ax1.set_xticks([250, 300, 400, 500, 600, 700, 800])
 
 else:
     allymax = []
@@ -316,7 +318,7 @@ else:
         for itm2 in data[itm1]:
             allymax.append(max(data[itm1][itm2][xlims_idxs[0]:xlims_idxs[-1]]))
     ymax1 = max(allymax)
-    ax1.set(xlabel='Wavelength, nm',
+    ax1.set(xlabel=r'$\lambda$' + ', nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[xmin,xmax],
