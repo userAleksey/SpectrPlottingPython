@@ -20,20 +20,20 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'fig_14'
+str1 = '6(RMG380)'
 str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = 'statiyav2'
+day_of_exp = '30_10_2019(SunOil)'
 
 xmin = 250
-xmax = 600
+xmax = 800
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
 getivals = 1
 norm_max = 0
 norm_val = 0
-smooth = 1
+smooth = 0
 backgroundless = 0
 legend = 1
 lod_legend = 0
@@ -42,7 +42,7 @@ dyax = 0
 fitting = 0
 something = 0
 subrel = 1
-normalize = 1
+normalize = 0
 
 if getivals:
     ivals = {}
@@ -135,13 +135,20 @@ if dyax == 1:
 fig.set_tight_layout(True)
 
 if subrel == 1:
-    for itm in data['seawater']:
-        backgroundsignal = data['seawater'][itm]
+    for itm in data:
+        if itm == 'SeaWater' or itm == 'seawater':
+            for itm2 in data[itm]:
+                backgroundsignal = data[itm][itm2]
+    #for itm in data['seawater']:
+    #    backgroundsignal = data['seawater'][itm]
+        if itm == 'seawater20':
+            for itm2 in data[itm]:
+                backgroundsignal2 = data[itm][itm2]
     #for itm in data['seawater20']:
     #        backgroundsignal2 = data['seawater20'][itm]
 
     for itm in data:
-        if itm == 'seawater':
+        if itm == 'seawater' or 'SeaWater':
             continue
         if itm == '_RMB30 80 mcm':
             data[itm] = managedata.norm_val(data[itm], wl, xlims_idxs)
@@ -155,6 +162,9 @@ if subrel == 1:
         if itm == '20 mcm 3 day' or itm == '20 mcm':
             for itm2 in data[itm]:
                 data[itm][itm2] = data[itm][itm2] - backgroundsignal2
+        if itm != 'SeaWater':
+            for itm2 in data[itm]:
+                data[itm][itm2] = data[itm][itm2] - backgroundsignal
 
         if smooth:
             if itm == '20 mcm 3 day' or itm == '100 mcm 3 day' or itm == '300 mcm 3 day' or itm == '500 mcm 3 day':
