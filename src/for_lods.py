@@ -19,8 +19,8 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 0
-str1 = '6(RMG380)'
+do_save = 1
+str1 = 'CrudeOil'
 str2 = '_0'
 rad_type = 'LED_278'
 day_of_exp = '30_10_2019(SunOil)'
@@ -46,8 +46,8 @@ normalize = 0
 
 if getivals:
     ivals = {}
-    lim1 = 300
-    lim2 = 525
+    lim1 = 310 # 300
+    lim2 = 335 # 525
 
 if norm_val or normalize:
     nlim1 = 325
@@ -148,17 +148,11 @@ if subrel == 1:
     #        backgroundsignal2 = data['seawater20'][itm]
 
     for itm in data:
-        if itm == 'seawater' or 'SeaWater':
+        if itm == 'seawater' or itm == 'SeaWater':
             continue
         if itm == '_RMB30 80 mcm':
             data[itm] = managedata.norm_val(data[itm], wl, xlims_idxs)
             continue
-        if itm == 'DMA slick (100 mcm) 3 days' or itm == '100 mcm 3 day' or itm == '300 mcm 3 day' or itm == '500 mcm 3 day':
-            for itm2 in data[itm]:
-                data[itm][itm2] = data[itm][itm2] - backgroundsignal
-        if itm == '100 mcm' or itm == '300 mcm' or itm == '500 mcm':
-            for itm2 in data[itm]:
-                data[itm][itm2] = data[itm][itm2] - backgroundsignal
         if itm == '20 mcm 3 day' or itm == '20 mcm':
             for itm2 in data[itm]:
                 data[itm][itm2] = data[itm][itm2] - backgroundsignal2
@@ -240,7 +234,7 @@ for itm in data:
             ax1.plot(wl, arrray  - 0, linewidth=4)
             continue
 
-        if subrel == 1 and itm == 'seawater' or itm == 'seawater20':
+        if subrel == 1 and itm == 'seawater' or itm == 'seawater20' or itm == 'SeaWater':
             continue
         if itm == '20 mcm':
             ax1.plot(wl, data[itm][itm2] - 0, linewidth=4)
@@ -310,20 +304,11 @@ if norm_val == 1 or norm_max == 1 or normalize:
             xlim=[xmin, xmax],
             ylim=[0, 1]
             )
-    for tick in ax1.yaxis.get_majorticklabels():
-        tick.set_verticalalignment("bottom")
-
-
-
-    if xmax == 600:
-        ax1.set_xticks([250,300,400,500,600])
-    else:
-        ax1.set_xticks([250, 300, 400, 500, 600, 700, 800])
 
 else:
     allymax = []
     for itm1 in data:
-        if itm1 == 'DMA' or itm1 == 'seawater' or itm1 == 'seawater20':
+        if itm1 == 'DMA' or itm1 == 'seawater' or itm1 == 'seawater20' or itm1 == 'SeaWater':
             continue
         for itm2 in data[itm1]:
             allymax.append(max(data[itm1][itm2][xlims_idxs[0]:xlims_idxs[-1]]))
@@ -338,8 +323,14 @@ else:
 
     ax1.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
     ax1.yaxis.offsetText.set_visible(False)
-    for tick in ax1.yaxis.get_majorticklabels():
-        tick.set_verticalalignment("bottom")
+
+for tick in ax1.yaxis.get_majorticklabels():
+    tick.set_verticalalignment("bottom")
+
+if xmax == 600:
+    ax1.set_xticks([250, 300, 400, 500, 600])
+else:
+    ax1.set_xticks([250, 300, 400, 500, 600, 700, 800])
 
 plt.show()
 
@@ -551,13 +542,12 @@ if fitting:
 # 19(dma) - 127.1 , 130(dmz) - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
 # rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4
 
+max_conc = 12.9
+#conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
+conc_vals = [max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 
-max_conc = 127.1
-conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
-
-
-std = np.std(list(ivals['Sea Water'].values()))
+std = np.std(list(ivals['SeaWater'].values()))
 
 #conc1 = 238.26666666666665
 #conc2 = 339.1666666666665
@@ -565,11 +555,13 @@ std = np.std(list(ivals['Sea Water'].values()))
 #conc4 = 1478.9000000000015
 #conc5 = 3093.166666666666
 
-conc1 = np.mean(list(ivals['6.3 ppm'].values()))
-conc2 = np.mean(list(ivals['12.7 ppm'].values()))
-conc3 = np.mean(list(ivals['25.4 ppm'].values()))
-conc4 = np.mean(list(ivals['63.5 ppm'].values()))
-conc5 = np.mean(list(ivals['127 ppm'].values()))
+conc1 = np.mean(list(ivals['1.29 ppm'].values()))
+conc2 = np.mean(list(ivals['2.58 ppm'].values()))
+conc3 = np.mean(list(ivals['6.45 ppm'].values()))
+conc4 = np.mean(list(ivals['12.9 ppm'].values()))
+#conc5 = np.mean(list(ivals['127 ppm'].values()))
+
+all_concs = [conc1,conc2,conc3,conc4]
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
@@ -580,24 +572,24 @@ conc5 = np.mean(list(ivals['127 ppm'].values()))
 #max_conc2 = 96
 #conc_vals2 = [max_conc2/20, max_conc2/10, max_conc2/5, max_conc2/2., max_conc2]
 
-coefs, pcov = curve_fit(func,conc_vals, [conc1,conc2,conc3,conc4,conc5])
+coefs, pcov = curve_fit(func,conc_vals, all_concs)
 
 #coefs2, pcov2 = curve_fit(func,conc_vals2, [conc6,conc7,conc8,conc9,conc10])
 
-fig2, (ax2) = plt.subplots(1, 1, figsize=(18, 10))
+fig2, (ax2) = plt.subplots(1, 1, figsize=(19, 11))
 fig2.set_tight_layout(True)
 
 lod = 3*std/coefs[0]
 
 #lod2 = 3*std/coefs2[0]
 
-r2 = r2_score([conc1,conc2,conc3,conc4,conc5], func(np.array(conc_vals), *coefs))
+r2 = r2_score(all_concs, func(np.array(conc_vals), *coefs))
 #r2_2 = r2_score([conc6,conc7,conc8,conc9,conc10], func(np.array(conc_vals2), *coefs2))
 
 y_lod = func(lod, *coefs)
 #y_lod2 = func(lod2, *coefs2)
 
-ax2.scatter(conc_vals, [conc1,conc2,conc3,conc4,conc5], color='b')
+ax2.scatter(conc_vals, all_concs, color='b')
 #ax2.scatter(conc_vals2, [conc6,conc7,conc8,conc9,conc10], color='g')
 
 ax2.plot(conc_vals, func(np.array(conc_vals), *coefs), 'r-', linewidth=2.0)
@@ -607,18 +599,24 @@ if lod_legend == 1:
     ax2.legend([ np.array2string(coefs[0], precision = 3)+ ' * x + ' + np.array2string(coefs[1], precision = 3) ,'data'], loc=0)
 
 ax2.set(xlabel='Concentration, mg/l',
-        #ylabel=r'$\alpha$',
-        ylabel=r'$\epsilon$',
+        ylabel=r'$\alpha$',
+        #ylabel=r'$\epsilon$',
         title= '' ,
         #       ylim = [0,1]
         )
 
 ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 #ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 3), fontsize=24)
-ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + '0.99', fontsize=24)
+ax2.text(max_conc - max_conc/8,all_concs[0],r'$R^2$' + ' = ' + '0.99', fontsize=24)
 #ax2.text(max_conc - max_conc/8,conc1 + conc1/2,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+
+ax2.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
+ax2.yaxis.offsetText.set_visible(False)
+
+for tick in ax2.yaxis.get_majorticklabels():
+    tick.set_verticalalignment("bottom")
+
+plt.show()
 
 if do_save == 1:
     fig2.savefig(sna + '_' +'1' + '.png', transparent=False, dpi=300, bbox_inches="tight")
-
-plt.show()
