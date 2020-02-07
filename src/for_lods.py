@@ -20,13 +20,15 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'DMA'
-str2 = '_0'
+#str1 = 'dma'
+str1 = '1_3 days'
+str2 = '_1'
 rad_type = 'LED_278'
-day_of_exp = 'DMA(04_02_20)'
+#day_of_exp = '08_08_2019'
+day_of_exp = '05_02(DynamicDMA)'
 
 xmin = 250
-xmax = 800
+xmax = 600
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -41,9 +43,9 @@ average = 1
 dyax = 0
 fitting = 0
 something = 0
-subrel = 1
+subrel = 0
 normalize = 0
-filtr = 0
+filtr = 1
 
 if getivals:
     ivals = {}
@@ -193,13 +195,15 @@ if filtr == 1:
                 filtrsignal = data[itm][itm2]
 
     filtrsignal = 100 / filtrsignal
-
+    from scipy import signal
     for itm in data:
         if itm == 'pet':
             continue
-        if itm == 'Immidiatly 500mcm(Pet300ms)2':
+        else:
             for itm2 in data[itm]:
-                data[itm][itm2] = data[itm][itm2] * filtrsignal
+                data[itm][itm2][260:-1] = data[itm][itm2][260:-1] * filtrsignal[260:-1]
+                #data[itm][itm2][0:260] = signal.savgol_filter(data[itm][itm2][0:260], 35, 1)
+
 
 if normalize == 1:
     for itm in data:
@@ -210,6 +214,9 @@ if normalize == 1:
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
         continue
+    if filtr == 1:
+        if itm == 'pet':
+            continue
     for itm2 in data[itm]:
         if itm == 'DMA 6 ppm':
             ax1.plot(wl, data[itm][itm2], 'r')
@@ -268,11 +275,11 @@ if legend == 1:
     for itm in list(data.keys()):
         if itm == '_DMA':
             continue
-        if itm.find(' 3 days') != -1:
+        if itm.find(' 3_days') != -1:
             itm = itm.replace(' 3 days', ' ')
-        if itm.find(' 3 day') != -1:
+        if itm.find(' 3_day') != -1:
             itm = itm.replace(' 3 day', ' ')
-        if itm.find(' mcm') != -1:
+        if itm.find('mcm') != -1:
             test1 = itm.replace('mc', r'$\mu$')
             legendset1.append(test1)
         else:
@@ -557,9 +564,9 @@ if fitting:
 # 19(dma) - 127.1 , 130(dmz) - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
 # rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4, dma - 3.3
 
-max_conc = 3.3
-#conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
-conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.1, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
+max_conc = 127.1
+conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
+#conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.1, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
 #conc_vals = [max_conc/10, max_conc/5, max_conc/2., max_conc]
 
 
@@ -572,18 +579,19 @@ std = np.std(list(ivals['SeaWater'].values()))
 #conc4 = 1478.9000000000015
 #conc5 = 3093.166666666666
 
-conc1 = np.mean(list(ivals['0.13 ppm'].values()))
-conc2 = np.mean(list(ivals['0.16 ppm'].values()))
-conc3 = np.mean(list(ivals['0.33 ppm'].values()))
-conc4 = np.mean(list(ivals['0.66 ppm'].values()))
-conc5 = np.mean(list(ivals['0.99 ppm'].values()))
-conc6 = np.mean(list(ivals['1.32 ppm'].values()))
-conc7 = np.mean(list(ivals['1.65 ppm'].values()))
-conc8 = np.mean(list(ivals['2.31 ppm'].values()))
-conc9 = np.mean(list(ivals['2.8 ppm'].values()))
-conc10 = np.mean(list(ivals['3.3 ppm'].values()))
+conc1 = np.mean(list(ivals['6.3 ppm'].values()))
+conc2 = np.mean(list(ivals['12.7 ppm'].values()))
+conc3 = np.mean(list(ivals['25.4 ppm'].values()))
+conc4 = np.mean(list(ivals['63.5 ppm'].values()))
+conc5 = np.mean(list(ivals['127 ppm'].values()))
+#conc6 = np.mean(list(ivals['1.32 ppm'].values()))
+#conc7 = np.mean(list(ivals['1.65 ppm'].values()))
+#conc8 = np.mean(list(ivals['2.31 ppm'].values()))
+#conc9 = np.mean(list(ivals['2.8 ppm'].values()))
+#conc10 = np.mean(list(ivals['3.3 ppm'].values()))
 
-all_concs = [conc1,conc2,conc3,conc4,conc5, conc6, conc7, conc8,conc9,conc10]
+#all_concs = [conc1,conc2,conc3,conc4,conc5, conc6, conc7, conc8,conc9,conc10]
+all_concs = [conc1,conc2,conc3,conc4,conc5]
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
