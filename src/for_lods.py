@@ -19,13 +19,13 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 0
+do_save = 1
 #str1 = 'dma'
-str1 = '1_3 days'
+str1 = 'DMA_3.3_to_42'
 str2 = '_1'
 rad_type = 'LED_278'
 #day_of_exp = '08_08_2019'
-day_of_exp = '05_02(DynamicDMA)'
+day_of_exp = 'DMA(04_02_20)'
 
 xmin = 250
 xmax = 600
@@ -43,9 +43,9 @@ average = 1
 dyax = 0
 fitting = 0
 something = 0
-subrel = 0
+subrel = 1
 normalize = 0
-filtr = 1
+filtr = 0
 
 if getivals:
     ivals = {}
@@ -102,7 +102,7 @@ data = {}
 
 itemslist = listdir(datapath)
 itemslist.sort()
-#itemslist = managedata.natural_sort(itemslist)
+itemslist = managedata.natural_sort(itemslist)
 
 for itm in itemslist:
     if not isdir(join(datapath,itm)):
@@ -562,10 +562,11 @@ if fitting:
 #----- for lods
 
 # 19(dma) - 127.1 , 130(dmz) - 133.9 , diesel - 83.7, rmb80 - 22.2, rmb80 (old) - 96, crude oil - 12.9, ...
-# rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4, dma - 3.3
+# rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4, dma - 3.3 (-->42)
 
-max_conc = 127.1
-conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
+max_conc = 42
+#conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
+conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
 #conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.1, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
 #conc_vals = [max_conc/10, max_conc/5, max_conc/2., max_conc]
 
@@ -579,19 +580,20 @@ std = np.std(list(ivals['SeaWater'].values()))
 #conc4 = 1478.9000000000015
 #conc5 = 3093.166666666666
 
-conc1 = np.mean(list(ivals['6.3 ppm'].values()))
-conc2 = np.mean(list(ivals['12.7 ppm'].values()))
-conc3 = np.mean(list(ivals['25.4 ppm'].values()))
-conc4 = np.mean(list(ivals['63.5 ppm'].values()))
-conc5 = np.mean(list(ivals['127 ppm'].values()))
-#conc6 = np.mean(list(ivals['1.32 ppm'].values()))
-#conc7 = np.mean(list(ivals['1.65 ppm'].values()))
-#conc8 = np.mean(list(ivals['2.31 ppm'].values()))
-#conc9 = np.mean(list(ivals['2.8 ppm'].values()))
+conc1 = np.mean(list(ivals['1.68 ppm'].values()))
+conc2 = np.mean(list(ivals['2.1 ppm'].values()))
+conc3 = np.mean(list(ivals['8.4 ppm'].values()))
+conc4 = np.mean(list(ivals['12.6 ppm'].values()))
+conc5 = np.mean(list(ivals['16.8 ppm'].values()))
+conc6 = np.mean(list(ivals['21 ppm'].values()))
+conc7 = np.mean(list(ivals['29.4 ppm'].values()))
+conc8 = np.mean(list(ivals['35.7 ppm'].values()))
+conc9 = np.mean(list(ivals['42 ppm'].values()))
 #conc10 = np.mean(list(ivals['3.3 ppm'].values()))
 
 #all_concs = [conc1,conc2,conc3,conc4,conc5, conc6, conc7, conc8,conc9,conc10]
-all_concs = [conc1,conc2,conc3,conc4,conc5]
+all_concs = [conc1,conc2,conc3,conc4,conc5, conc6, conc7, conc8,conc9]
+#all_concs = [conc1,conc2,conc3,conc4,conc5]
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
 #conc7 = np.mean(list(ivals['9.6(RMB80)'].values()))
@@ -638,9 +640,9 @@ ax2.set(xlabel='Concentration, mg/l',
 ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 2), fontsize=24)
 #ax2.text(max_conc - max_conc/8,all_concs[0],r'$R^2$' + ' = ' + '0.99', fontsize=24)
-ax2.text(max_conc - max_conc/8,all_concs[0] + conc1/3,'LOD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+ax2.text(max_conc - max_conc/8,all_concs[0] + conc1/3,'LoD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
-ax2.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
+ax2.ticklabel_format(axis='y', style='sci', scilimits=(4, 4), useMathText=True)
 ax2.yaxis.offsetText.set_visible(False)
 
 for tick in ax2.yaxis.get_majorticklabels():
