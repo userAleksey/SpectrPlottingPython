@@ -19,18 +19,14 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 1
-#str1 = 'dma'
-str1 = 'DMA_3.3_to_42'
-str2 = '_1'
+do_save = 0
+str1 = 'fig_13'
+str2 = '_0'
 rad_type = 'LED_278'
-#day_of_exp = '08_08_2019'
-day_of_exp = 'DMA(04_02_20)'
+day_of_exp = 'statiyav2'
 
 xmin = 250
 xmax = 600
-
-datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
 getivals = 1
 norm_max = 0
@@ -43,9 +39,12 @@ average = 1
 dyax = 0
 fitting = 0
 something = 0
-subrel = 1
+subrel = 0
 normalize = 0
 filtr = 0
+edits =0
+
+datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
 if getivals:
     ivals = {}
@@ -64,7 +63,7 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir,rad_type + '_' + str1 + str2)
+sna = join(res_dir,rad_type + '_' + day_of_exp  + str1 + str2)
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
@@ -230,34 +229,37 @@ for itm in data:
         if itm == 'DMA 63 ppm (5d)':
             ax1.plot(wl, data[itm][itm2], '--y')
             continue
-        #if itm == 'DMA slick (100 mcm) 3 days' and str1 == 'fig_5' and day_of_exp == 'statiyav2':
-        if itm == '20 mcm' or itm == '300 mcm' or itm == '500 mcm':
-            pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
-            noise = np.random.normal(0, 5.1, pure.shape)
-            signal = pure + noise
-            arrray = data[itm][itm2][0:226]
-            arrray = np.append(arrray,signal)
-            arrray = np.append(arrray,data[itm][itm2][290:-1])
-            ax1.plot(wl, arrray  - 0, linewidth=4)
-            continue
 
-        if itm == '100 mcm':
-            pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
-            noise = np.random.normal(0, 5.1, pure.shape)
-            signal = pure + noise
-            pure2 = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
-            noise2 = np.random.normal(0, 5.1, pure2.shape)
-            signal2 = pure2 + noise2
-            arrray = data[itm][itm2][0:226]
-            arrray = np.append(arrray,signal)
-            arrray = np.append(arrray,data[itm][itm2][290:435])
-            arrray = np.append(arrray, signal2)
-            arrray = np.append(arrray,data[itm][itm2][444:-1])
-            ax1.plot(wl, arrray  - 0, linewidth=4)
-            continue
+        if edits == 1:
+            #if itm == 'DMA slick (100 mcm) 3 days' and str1 == 'fig_5' and day_of_exp == 'statiyav2':
+            if itm == '20 mcm' or itm == '300 mcm' or itm == '500 mcm':
+                pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
+                noise = np.random.normal(0, 5.1, pure.shape)
+                signal = pure + noise
+                arrray = data[itm][itm2][0:226]
+                arrray = np.append(arrray,signal)
+                arrray = np.append(arrray,data[itm][itm2][290:-1])
+                ax1.plot(wl, arrray  - 0, linewidth=4)
+                continue
 
-        if subrel == 1 and itm == 'seawater' or itm == 'seawater20' or itm == 'SeaWater':
-            continue
+            if itm == '100 mcm':
+                pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
+                noise = np.random.normal(0, 5.1, pure.shape)
+                signal = pure + noise
+                pure2 = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
+                noise2 = np.random.normal(0, 5.1, pure2.shape)
+                signal2 = pure2 + noise2
+                arrray = data[itm][itm2][0:226]
+                arrray = np.append(arrray,signal)
+                arrray = np.append(arrray,data[itm][itm2][290:435])
+                arrray = np.append(arrray, signal2)
+                arrray = np.append(arrray,data[itm][itm2][444:-1])
+                ax1.plot(wl, arrray  - 0, linewidth=4)
+                continue
+
+        if subrel == 1:
+            if itm == 'seawater' or itm == 'seawater20' or itm == 'SeaWater':
+                continue
         if itm == '20 mcm':
             ax1.plot(wl, data[itm][itm2] - 0, linewidth=4)
             continue
