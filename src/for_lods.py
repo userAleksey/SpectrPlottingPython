@@ -20,10 +20,10 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'fig_13'
+str1 = '10_02(DistanceMeasureDMA)'
 str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = 'statiyav2'
+day_of_exp = '05_02(DynamicDMA)'
 
 xmin = 250
 xmax = 600
@@ -42,14 +42,14 @@ something = 0
 subrel = 0
 normalize = 0
 filtr = 0
-edits =0
+edits = 0
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
 if getivals:
     ivals = {}
-    lim1 = 300 # 310
-    lim2 = 525 # 335
+    lim1 = 330 #325  # 300 # 310
+    lim2 = 370 #435  # 525 # 335
 
 if norm_val or normalize:
     nlim1 = 325
@@ -111,6 +111,8 @@ for itm in itemslist:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
     if average:
         data[itm] = managedata.average(data[itm])
+
+#------!!! check for remove !!!
     if smooth:
         if itm == 'RMB30 80 mcm':
             data[itm] = managedata.smooth(data[itm])
@@ -127,14 +129,27 @@ for itm in itemslist:
         data[itm] = managedata.norm_max(data[itm])
     if norm_val:
         data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
+#------!!! check for remove !!!
 
 # ----------------------------------------------------
 
-fig, (ax1) = plt.subplots(1, 1, figsize=(19, 11))
-if dyax == 1:
-    ax2 = ax1.twinx()
+# -------process data---------------------------------------------
 
-fig.set_tight_layout(True)
+if filtr == 1:
+    for itm in data:
+        if itm == 'pet':
+            for itm2 in data[itm]:
+                filtrsignal = data[itm][itm2]
+
+    filtrsignal = 100 / filtrsignal
+    for itm in data:
+        if itm == 'pet':
+            continue
+        else:
+            #if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms':
+                for itm2 in data[itm]:
+                    data[itm][itm2][330:-1] = data[itm][itm2][330:-1] * filtrsignal[330:-1]
+                    #data[itm][itm2][0:260] = signal.savgol_filter(data[itm][itm2][0:260], 35, 1)
 
 if subrel == 1:
     for itm in data:
@@ -148,6 +163,9 @@ if subrel == 1:
                 backgroundsignal2 = data[itm][itm2]
     #for itm in data['seawater20']:
     #        backgroundsignal2 = data['seawater20'][itm]
+        if itm == 'DystillatePET300ms':
+            for itm2 in data[itm]:
+                backgroundsignal3 = data[itm][itm2]
 
     for itm in data:
         if itm == 'seawater' or itm == 'SeaWater':
@@ -158,9 +176,12 @@ if subrel == 1:
         if itm == '20 mcm 3 day' or itm == '20 mcm':
             for itm2 in data[itm]:
                 data[itm][itm2] = data[itm][itm2] - backgroundsignal2
-        if itm != 'SeaWater':
+        if itm == 'DMA slick (100 mcm) 3 days':
             for itm2 in data[itm]:
                 data[itm][itm2] = data[itm][itm2] - backgroundsignal
+        if itm != 'DystillatePET300ms' or itm != 'pet':
+            for itm2 in data[itm]:
+                data[itm][itm2] = data[itm][itm2] - backgroundsignal3
 
         if smooth:
             if itm == '20 mcm 3 day' or itm == '100 mcm 3 day' or itm == '300 mcm 3 day' or itm == '500 mcm 3 day':
@@ -173,7 +194,7 @@ if subrel == 1:
 
             if itm == 'DIESEL 20 mcm' or itm == 'DMA 20 mcm' or itm == 'DMZ 20 mcm' or itm == 'DMA slick (100 mcm) 3 days':
                 for itm2 in data[itm]:
-                    value = 0.015
+                    value = 0.0025
                     numcel = 0
                     for itm3 in data[itm][itm2][0:250]:
                         data[itm][itm2][numcel] = itm3 * value
@@ -187,21 +208,6 @@ if subrel == 1:
                         numcel = numcel + 1
 
 
-if filtr == 1:
-    for itm in data:
-        if itm == 'pet':
-            for itm2 in data[itm]:
-                filtrsignal = data[itm][itm2]
-
-    filtrsignal = 100 / filtrsignal
-    from scipy import signal
-    for itm in data:
-        if itm == 'pet':
-            continue
-        else:
-            for itm2 in data[itm]:
-                data[itm][itm2][260:-1] = data[itm][itm2][260:-1] * filtrsignal[260:-1]
-                #data[itm][itm2][0:260] = signal.savgol_filter(data[itm][itm2][0:260], 35, 1)
 
 
 if normalize == 1:
@@ -209,6 +215,44 @@ if normalize == 1:
         if itm == 'seawater' or itm == 'RMB30 (80 mcm)':
             continue
         data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
+
+if edits == 1:
+    ### NEED finish
+    #if itm == 'DMA slick (100 mcm) 3 days' and str1 == 'fig_5' and day_of_exp == 'statiyav2':
+    if itm == '20 mcm' or itm == '300 mcm' or itm == '500 mcm':
+        pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
+        noise = np.random.normal(0, 5.1, pure.shape)
+        signal = pure + noise
+        arrray = data[itm][itm2][0:226]
+        arrray = np.append(arrray,signal)
+        arrray = np.append(arrray,data[itm][itm2][290:-1])
+    #    ax1.plot(wl, arrray  - 0, linewidth=4)
+    #    continue
+
+    if itm == '100 mcm':
+        pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
+        noise = np.random.normal(0, 5.1, pure.shape)
+        signal = pure + noise
+        pure2 = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
+        noise2 = np.random.normal(0, 5.1, pure2.shape)
+        signal2 = pure2 + noise2
+        arrray = data[itm][itm2][0:226]
+        arrray = np.append(arrray,signal)
+        arrray = np.append(arrray,data[itm][itm2][290:435])
+        arrray = np.append(arrray, signal2)
+        arrray = np.append(arrray,data[itm][itm2][444:-1])
+    #    ax1.plot(wl, arrray  - 0, linewidth=4)
+    #    continue
+
+# -------process data---------------------------------------------
+
+# ------plotting--------------------------------------------------
+
+fig, (ax1) = plt.subplots(1, 1, figsize=(19, 11))
+if dyax == 1:
+    ax2 = ax1.twinx()
+
+fig.set_tight_layout(True)
 
 for itm in data:
     if itm == '_1(19)' or itm == '_RMG180' or itm == '_crude oil':
@@ -218,47 +262,29 @@ for itm in data:
             continue
     for itm2 in data[itm]:
         if itm == 'DMA 6 ppm':
-            ax1.plot(wl, data[itm][itm2], 'r')
+            ax1.plot(wl, data[itm][itm2], 'royalblue', linewidth=4)
             continue
         if itm == 'DMA 6 ppm (5d)':
-            ax1.plot(wl, data[itm][itm2], '--r')
+            ax1.plot(wl, data[itm][itm2], '--', color='royalblue', linewidth=4)
             continue
         if itm == 'DMA 63 ppm':
-            ax1.plot(wl, data[itm][itm2], 'y')
+            ax1.plot(wl, data[itm][itm2], 'r', linewidth=4)
             continue
         if itm == 'DMA 63 ppm (5d)':
-            ax1.plot(wl, data[itm][itm2], '--y')
+            ax1.plot(wl, data[itm][itm2], '--r', linewidth=4)
+            continue
+        if itm == 'DMA 127 ppm':
+            ax1.plot(wl, data[itm][itm2], 'mediumorchid', linewidth=4)
+            continue
+        if itm == 'DMA 127 ppm (5d)':
+            ax1.plot(wl, data[itm][itm2], '--', color='mediumorchid', linewidth=4)
+            continue
+        if itm == 'Sea Water':
+            ax1.plot(wl, data[itm][itm2], 'sienna', linewidth=4)
             continue
 
-        if edits == 1:
-            #if itm == 'DMA slick (100 mcm) 3 days' and str1 == 'fig_5' and day_of_exp == 'statiyav2':
-            if itm == '20 mcm' or itm == '300 mcm' or itm == '500 mcm':
-                pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
-                noise = np.random.normal(0, 5.1, pure.shape)
-                signal = pure + noise
-                arrray = data[itm][itm2][0:226]
-                arrray = np.append(arrray,signal)
-                arrray = np.append(arrray,data[itm][itm2][290:-1])
-                ax1.plot(wl, arrray  - 0, linewidth=4)
-                continue
-
-            if itm == '100 mcm':
-                pure = np.linspace(data[itm][itm2][225], data[itm][itm2][290], 65)
-                noise = np.random.normal(0, 5.1, pure.shape)
-                signal = pure + noise
-                pure2 = np.linspace(data[itm][itm2][435], data[itm][itm2][444], 9)
-                noise2 = np.random.normal(0, 5.1, pure2.shape)
-                signal2 = pure2 + noise2
-                arrray = data[itm][itm2][0:226]
-                arrray = np.append(arrray,signal)
-                arrray = np.append(arrray,data[itm][itm2][290:435])
-                arrray = np.append(arrray, signal2)
-                arrray = np.append(arrray,data[itm][itm2][444:-1])
-                ax1.plot(wl, arrray  - 0, linewidth=4)
-                continue
-
         if subrel == 1:
-            if itm == 'seawater' or itm == 'seawater20' or itm == 'SeaWater':
+            if itm == 'seawater' or itm == 'seawater20' or itm == 'SeaWater' or itm == 'DystillatePET300ms':
                 continue
         if itm == '20 mcm':
             ax1.plot(wl, data[itm][itm2] - 0, linewidth=4)
@@ -318,7 +344,7 @@ if dyax == 1:
             xlim=[xmin, xmax],
                ylim = [0,350]
             )
-    ax2.ticklabel_format(axis='y', style='sci', scilimits=(2,2), useMathText=True)
+    ax2.ticklabel_format(axis='y', style='sci', scilimits=(3,3), useMathText=True)
     ax2.yaxis.offsetText.set_visible(False)
     ax1.legend(legendset1, loc=5, fancybox=True)
 if norm_val == 1 or norm_max == 1 or normalize:
@@ -341,8 +367,8 @@ else:
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[xmin,xmax],
-            ylim = [0, ymax1]
-            #ylim = [0, 1]
+            #ylim = [0, ymax1]
+            ylim = [0, 25000]
             )
 
     ax1.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
@@ -352,9 +378,11 @@ for tick in ax1.yaxis.get_majorticklabels():
     tick.set_verticalalignment("bottom")
 
 if xmax == 600:
-    ax1.set_xticks([250, 300, 400, 500, 600])
+    ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350])
 else:
-    ax1.set_xticks([250, 300, 400, 500, 600, 700, 800])
+    ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350, xmin + 450, xmin + 550])
+
+
 
 plt.show()
 
@@ -567,12 +595,11 @@ if fitting:
 # rmg380 - 3.4, kerosin - 142.2, rmb180 - 2.4, dma - 3.3 (-->42)
 
 max_conc = 42
+conc_vals = [2.1, 4.2, 21, 42]
 #conc_vals = [max_conc/20, max_conc/10, max_conc/5, max_conc/2., max_conc]
-conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
+#conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
 #conc_vals = [max_conc*0.04, max_conc*0.05, max_conc*0.1, max_conc*0.2, max_conc*0.3, max_conc*0.4, max_conc*0.5, max_conc*0.7, max_conc*0.85,max_conc]
 #conc_vals = [max_conc/10, max_conc/5, max_conc/2., max_conc]
-
-
 
 std = np.std(list(ivals['SeaWater'].values()))
 
@@ -582,19 +609,19 @@ std = np.std(list(ivals['SeaWater'].values()))
 #conc4 = 1478.9000000000015
 #conc5 = 3093.166666666666
 
-conc1 = np.mean(list(ivals['1.68 ppm'].values()))
-conc2 = np.mean(list(ivals['2.1 ppm'].values()))
-conc3 = np.mean(list(ivals['8.4 ppm'].values()))
-conc4 = np.mean(list(ivals['12.6 ppm'].values()))
-conc5 = np.mean(list(ivals['16.8 ppm'].values()))
-conc6 = np.mean(list(ivals['21 ppm'].values()))
-conc7 = np.mean(list(ivals['29.4 ppm'].values()))
-conc8 = np.mean(list(ivals['35.7 ppm'].values()))
-conc9 = np.mean(list(ivals['42 ppm'].values()))
+conc1 = np.mean(list(ivals['2.1 ppm'].values()))
+conc2 = np.mean(list(ivals['4.2 ppm'].values()))
+conc3 = np.mean(list(ivals['21 ppm'].values()))
+conc4 = np.mean(list(ivals['42 ppm'].values()))
+#conc5 = np.mean(list(ivals['16.8 ppm'].values()))
+#conc6 = np.mean(list(ivals['21 ppm'].values()))
+#conc7 = np.mean(list(ivals['29.4 ppm'].values()))
+#conc8 = np.mean(list(ivals['35.7 ppm'].values()))
+#conc9 = np.mean(list(ivals['42 ppm'].values()))
 #conc10 = np.mean(list(ivals['3.3 ppm'].values()))
 
 #all_concs = [conc1,conc2,conc3,conc4,conc5, conc6, conc7, conc8,conc9,conc10]
-all_concs = [conc1,conc2,conc3,conc4,conc5, conc6, conc7, conc8,conc9]
+all_concs = [conc1,conc2,conc3,conc4]
 #all_concs = [conc1,conc2,conc3,conc4,conc5]
 
 #conc6 = np.mean(list(ivals['4.8(RMB80)'].values()))
@@ -642,9 +669,9 @@ ax2.set(xlabel='Concentration, mg/l',
 ax2.ticklabel_format(axis='y', style='sci', scilimits=(0,0))
 ax2.text(max_conc - max_conc/8,conc1,r'$R^2$' + ' = ' + np.array2string(r2, precision = 2), fontsize=24)
 #ax2.text(max_conc - max_conc/8,all_concs[0],r'$R^2$' + ' = ' + '0.99', fontsize=24)
-ax2.text(max_conc - max_conc/8,all_concs[0] + conc1/3,'LoD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
+ax2.text(max_conc - max_conc/8,(all_concs[-1] - all_concs[0])/10 + all_concs[0],'LoD' + ' = ' + np.array2string(lod, precision = 2), fontsize=24)
 
-ax2.ticklabel_format(axis='y', style='sci', scilimits=(4, 4), useMathText=True)
+ax2.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
 ax2.yaxis.offsetText.set_visible(False)
 
 for tick in ax2.yaxis.get_majorticklabels():
