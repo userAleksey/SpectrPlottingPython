@@ -20,13 +20,13 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = '10_02(DistanceMeasureDMA)'
+str1 = 'fig_11new'
 str2 = '_0'
 rad_type = 'LED_278'
-day_of_exp = '05_02(DynamicDMA)'
+day_of_exp = 'statiyav2'
 
 xmin = 250
-xmax = 600
+xmax = 800
 
 getivals = 1
 norm_max = 0
@@ -270,11 +270,17 @@ for itm in data:
         if itm == 'DMA 63 ppm':
             ax1.plot(wl, data[itm][itm2], 'r', linewidth=4)
             continue
+        if itm == '42 ppm':
+            ax1.plot(wl, data[itm][itm2], 'r', linewidth=4)
+            continue
         if itm == 'DMA 63 ppm (5d)':
             ax1.plot(wl, data[itm][itm2], '--r', linewidth=4)
             continue
         if itm == 'DMA 127 ppm':
             ax1.plot(wl, data[itm][itm2], 'mediumorchid', linewidth=4)
+            continue
+        if itm == 'sea water + sun':
+            ax1.plot(wl, data[itm][itm2], 'sienna', linewidth=4)
             continue
         if itm == 'DMA 127 ppm (5d)':
             ax1.plot(wl, data[itm][itm2], '--', color='mediumorchid', linewidth=4)
@@ -367,11 +373,11 @@ else:
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[xmin,xmax],
-            #ylim = [0, ymax1]
-            ylim = [0, 25000]
+            ylim = [0, ymax1]
+            #ylim = [0, 1100]
             )
 
-    ax1.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
+    ax1.ticklabel_format(axis='y', style='sci', scilimits=(2, 2), useMathText=True)
     ax1.yaxis.offsetText.set_visible(False)
 
 for tick in ax1.yaxis.get_majorticklabels():
@@ -382,7 +388,8 @@ if xmax == 600:
 else:
     ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350, xmin + 450, xmin + 550])
 
-
+#ax1.axvline(x=345.9,linestyle='--',color='black',ymax=0.68)
+#ax1.text(345.9,400,'346', fontsize=24)
 
 plt.show()
 
