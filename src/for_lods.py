@@ -20,13 +20,13 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'fig_11new'
+str1 = 'fig_6new'
 str2 = '_0'
 rad_type = 'LED_278'
 day_of_exp = 'statiyav2'
 
 xmin = 250
-xmax = 800
+xmax = 600
 
 getivals = 1
 norm_max = 0
@@ -39,7 +39,7 @@ average = 1
 dyax = 0
 fitting = 0
 something = 0
-subrel = 0
+subrel = 1
 normalize = 0
 filtr = 0
 edits = 0
@@ -153,7 +153,7 @@ if filtr == 1:
 
 if subrel == 1:
     for itm in data:
-        if itm == 'SeaWater' or itm == 'seawater':
+        if itm == 'SeaWater' or itm == 'seawater' or itm == 'sea water':
             for itm2 in data[itm]:
                 backgroundsignal = data[itm][itm2]
     #for itm in data['seawater']:
@@ -168,8 +168,11 @@ if subrel == 1:
                 backgroundsignal3 = data[itm][itm2]
 
     for itm in data:
-        if itm == 'seawater' or itm == 'SeaWater':
+        if itm == 'seawater' or itm == 'SeaWater' or itm == 'sea water':
             continue
+        for itm2 in data[itm]:
+            data[itm][itm2] = data[itm][itm2] - backgroundsignal
+        continue
         if itm == '_RMB30 80 mcm':
             data[itm] = managedata.norm_val(data[itm], wl, xlims_idxs)
             continue
@@ -377,7 +380,7 @@ else:
             #ylim = [0, 1100]
             )
 
-    ax1.ticklabel_format(axis='y', style='sci', scilimits=(2, 2), useMathText=True)
+    ax1.ticklabel_format(axis='y', style='sci', scilimits=(3, 3), useMathText=True)
     ax1.yaxis.offsetText.set_visible(False)
 
 for tick in ax1.yaxis.get_majorticklabels():
@@ -388,7 +391,9 @@ if xmax == 600:
 else:
     ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350, xmin + 450, xmin + 550])
 
-#ax1.axvline(x=345.9,linestyle='--',color='black',ymax=0.68)
+ax1.set_ylabel('I, rel. un.', rotation=0, fontsize=20, labelpad=20)
+ax1.yaxis.set_label_coords(0.05,1.00)
+#ax1.axvline(x=345.895,linestyle='--',color='black',ymax=0.85)
 #ax1.text(345.9,400,'346', fontsize=24)
 
 plt.show()
