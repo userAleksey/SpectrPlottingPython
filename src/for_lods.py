@@ -19,7 +19,7 @@ from somedataproc import managedata, processdata
 def func(x, a, b):
     return a*x+b
 
-do_save = 0
+do_save = 1
 str1 = 'fig_6new'
 str2 = '_0'
 rad_type = 'LED_278'
@@ -301,6 +301,10 @@ for itm in data:
         if itm == 'RMB30 80 mcm':
             ax1.plot(wl, data[itm][itm2] - 0, linewidth=4)
             continue
+
+        if itm == 'RMB30' or itm == 'RME380' or itm == 'RMG180' or itm == 'crude oil':
+            continue
+
         data[itm][itm2] = data[itm][itm2] - 0
         ax1.plot(wl, data[itm][itm2], linewidth=4)
 
@@ -310,7 +314,7 @@ for itm in data:
 if legend == 1:
     legendset1 = []
     for itm in list(data.keys()):
-        if itm == '_DMA':
+        if itm == 'RMB30' or itm == 'RME380' or itm == 'RMG180' or itm == 'crude oil':
             continue
         if itm.find(' 3_days') != -1:
             itm = itm.replace(' 3 days', ' ')
@@ -329,33 +333,51 @@ if dyax == 1:
         if itm == '1(19)':
             for itm2 in data[itm]:
                 ax2.plot(wl, data[itm][itm2], 'm-')
-        if itm == 'RMG380':
+
+        if itm == 'RMB30':
             for itm2 in data[itm]:
-                ax2.plot(wl, data[itm][itm2], color='maroon')
+                ax2.plot(wl, data[itm][itm2], color='C4', linestyle = '--', linewidth=4)
+        if itm == 'RME380':
+            for itm2 in data[itm]:
+                ax2.plot(wl, data[itm][itm2], color='C5', linestyle = '--', linewidth=4)
         if itm == 'RMG180':
             for itm2 in data[itm]:
-                ax2.plot(wl, data[itm][itm2], color = '0.75')
+                ax2.plot(wl, data[itm][itm2], color='C6', linestyle = '--', linewidth=4)
         if itm == 'crude oil':
             for itm2 in data[itm]:
-                ax2.plot(wl, data[itm][itm2], 'k-')
+                ax2.plot(wl, data[itm][itm2], color='C7', linestyle = '--', linewidth=4)
         if itm == 'RMB80 slick 80 mcm':
             for itm2 in data[itm]:
                 ax2.plot(wl, data[itm][itm2], linewidth=4)
 
-    #if legend == 1:
-        #ax2.legend(list(data.keys()), loc=0, bbox_to_anchor=(0.5, 0., 0.5, 0.8))
-        #ax2.legend(list(data.keys())[4:8], loc=1)
-        #ax2.legend(['yyy'])
+    if legend == 1:
+        legendset2 = []
+        for itm in list(data.keys()):
+            if itm == 'auto diesel oil' or itm == 'DMA' or itm == 'DMZ' or itm == 'kerosene':
+                continue
+            if itm.find(' 3_days') != -1:
+                itm = itm.replace(' 3 days', ' ')
+            if itm.find(' 3_day') != -1:
+                itm = itm.replace(' 3 day', ' ')
+            if itm.find('mcm') != -1:
+                test1 = itm.replace('mc', r'$\mu$')
+                legendset2.append(test1)
+            else:
+                legendset2.append(itm)
 
-    ax2.set(xlabel='Wavelength, nm',
+        ax2.legend(legendset2, loc=1, fancybox=True, facecolor='white', frameon=False)
+
+
+
+    ax2.set(xlabel=r'$\lambda$' + ', nm',
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[xmin, xmax],
-               ylim = [0,350]
+               ylim = [0,5350]
             )
     ax2.ticklabel_format(axis='y', style='sci', scilimits=(3,3), useMathText=True)
     ax2.yaxis.offsetText.set_visible(False)
-    ax1.legend(legendset1, loc=5, fancybox=True)
+    #ax1.legend(legendset1, loc=5, fancybox=True)
 if norm_val == 1 or norm_max == 1 or normalize:
     ax1.set(xlabel=r'$\lambda$' + ', nm',
             ylabel='I, norm',
@@ -386,15 +408,28 @@ else:
 for tick in ax1.yaxis.get_majorticklabels():
     tick.set_verticalalignment("bottom")
 
-if xmax == 600:
-    ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350])
-else:
-    ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350, xmin + 450, xmin + 550])
+# magic specs -------------------------
+
+#if xmax == 600:
+#    ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350])
+#else:
+#    ax1.set_xticks([xmin, xmin + 50, xmin + 150, xmin + 250, xmin + 350, xmin + 450, xmin + 550])
 
 ax1.set_ylabel('I, rel. un.', rotation=0, fontsize=20, labelpad=20)
 ax1.yaxis.set_label_coords(0.05,1.00)
-#ax1.axvline(x=345.895,linestyle='--',color='black',ymax=0.85)
-#ax1.text(345.9,400,'346', fontsize=24)
+
+if dyax == 1:
+    ax1.set_ylabel('I, rel. un.(light fuel)', rotation=0, fontsize=20, labelpad=20)
+    ax2.set_ylabel('I, rel. un.(heavy fuel)', rotation=0, fontsize=20, labelpad=20)
+    ax2.yaxis.set_label_coords(0.9, 1.03)
+
+    for tick in ax2.yaxis.get_majorticklabels():
+        tick.set_verticalalignment("bottom")
+
+ax1.axvline(x=345.895,linestyle='--',color='black',ymax=0.85)
+ax1.text(345.9,400,'346', fontsize=24)
+
+# magic specs -------------------------
 
 plt.show()
 
