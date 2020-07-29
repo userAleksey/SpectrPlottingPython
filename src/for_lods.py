@@ -43,13 +43,11 @@ fitting = 0
 something = 0
 subrel = 0
 normalize = 0
-filtr = 0
 edits = 0
-select_items = 1
-average = 1
 
-
-
+select_items = 0
+average = 0
+filtr = 0
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -152,8 +150,6 @@ for itm in itemslist:
     else:
         data[itm] = managedata.load_data(join(datapath, itm))
 
-
-
     if getivals:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
     if average:
@@ -183,25 +179,28 @@ for itm in itemslist:
 #------!!! check for remove !!!
 
 # ----------------------------------------------------
-print('')
+
 # -------process data---------------------------------------------
 
 if filtr == 1:
     filtrsignal = None
     for itm in data:
-        if itm == 'pet':
+        if itm == 'TranspLIBSfilter':
             for itm2 in data[itm]:
                 filtrsignal = data[itm][itm2]
-    if filtrsignal:
-        filtrsignal = 100 / filtrsignal
+
+    filtrsignal = np.loadtxt(join(datapath, '..', 'TranspLIBSfilter.txt'), dtype=np.str, skiprows=17, usecols=1, comments='>')
+    filtrsignal = np.char.replace(filtrsignal, ',', '.').astype(np.float64)
+
+    filtrsignal = 100.000 / filtrsignal
     for itm in data:
-        if itm == 'pet':
+        if itm == 'TranspLIBSfilter':
             continue
         else:
             #if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms':
                 for itm2 in data[itm]:
-                    data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
-                    #data[itm][itm2][320:-1] = data[itm][itm2][320:-1] * filtrsignal[320:-1]
+                    #data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
+                    data[itm][itm2][250:-1] = data[itm][itm2][250:-1] * filtrsignal[250:-1]
 
 
 
@@ -380,7 +379,7 @@ if legend == 1:
         else:
             legendset1.append(itm)
 
-    ax1.legend(legendset1, loc=0,fancybox=True, facecolor='white', frameon=False)
+    ax1.legend(legendset1, loc=2,fancybox=True, facecolor='white', frameon=False)
 
 if dyax == 1:
     for itm in data:
