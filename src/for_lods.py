@@ -14,35 +14,42 @@ from sklearn.metrics import r2_score
 import datetime
 # import re
 
+from scipy import signal
+
 from somedataproc import managedata, processdata
 
 def func(x, a, b):
     return a*x+b
 
-do_save = 1
-str1 = 'fig_6new'
+do_save = 0
+str1 = 'On Surface'
 str2 = '_0'
-rad_type = 'LED_278'
-day_of_exp = 'statiyav2'
+rad_type = 'rad_type'
+day_of_exp = '27_07(LIBS CleanWater_Ground_Shell)'
 
 xmin = 250
-xmax = 600
+xmax = 800
 
-getivals = 1
+getivals = 0
 norm_max = 0
 norm_val = 0
 smooth = 0
 backgroundless = 0
 legend = 1
 lod_legend = 0
-average = 1
+
 dyax = 0
 fitting = 0
 something = 0
-subrel = 1
+subrel = 0
 normalize = 0
 filtr = 0
 edits = 0
+select_items = 1
+average = 1
+
+
+
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -72,7 +79,7 @@ if not isdir(res_dir):
 for itm in listdir(datapath):
     for itm2 in listdir(join(datapath,itm)):
         if itm2.endswith(".txt"):
-            wl = np.loadtxt(join(datapath, itm, itm2 ), dtype=np.str, usecols=0, skiprows=14, comments='>')
+            wl = np.loadtxt(join(datapath, itm, itm2 ), dtype=np.str, usecols=0, skiprows=17, comments='>')
             break
         if itm2.endswith(".tif") or itm2.endswith(".tiff"):
             wl = np.loadtxt(join(datapath, '..', 'wavelengths'), dtype=np.str, usecols=0, comments='>')
@@ -106,11 +113,55 @@ itemslist = managedata.natural_sort(itemslist)
 for itm in itemslist:
     if not isdir(join(datapath,itm)):
         continue
-    data[itm] = managedata.load_data(join(datapath, itm))
+    if select_items:
+        y_val_for_sel = None
+        y_val2_for_sel = None
+        if itm == 'CleanWater':
+            #y_val_for_sel = 600
+            y_val_for_sel = None
+            y_val2_for_sel = 1400
+        if itm == 'FilmInWater(11_07 500Spectra)':
+            y_val_for_sel = 700
+            y_val2_for_sel = 1100
+        if itm == 'Ground':
+            #y_val_for_sel = 200
+            y_val_for_sel = None
+            y_val2_for_sel = 600
+        if itm == 'Shell':
+            y_val_for_sel = 400
+            y_val2_for_sel = None
+        if itm == 'CleanWater' and str1 == 'On Surface':
+            y_val_for_sel = 15000
+            y_val2_for_sel = None
+        if itm == 'Film14_07SurfaceOneCascade':
+            y_val_for_sel = 15000
+            y_val2_for_sel = None
+        if itm == 'FilmOnSurface(11_07)OneCascade':
+            y_val_for_sel = 6000
+            y_val2_for_sel = None
+        if itm == 'Ground' and str1 == 'On Surface':
+            y_val_for_sel = 5000
+            y_val2_for_sel = None
+        if itm == 'Shell' and str1 == 'On Surface':
+            y_val_for_sel = 4000
+            y_val2_for_sel = None
+        if y_val2_for_sel:
+            data[itm + '_655'] = managedata.load_data_with_sel(join(datapath, itm), y_val2_for_sel)
+        if y_val_for_sel:
+            data[itm] = managedata.load_data_with_sel(join(datapath, itm), y_val_for_sel)
+    else:
+        data[itm] = managedata.load_data(join(datapath, itm))
+
+
+
     if getivals:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
     if average:
-        data[itm] = managedata.average(data[itm])
+        if y_val_for_sel:
+            data[itm] = managedata.average(data[itm])
+        if y_val2_for_sel:
+            data[itm + '_655'] = managedata.average(data[itm + '_655'])
+
 
 #------!!! check for remove !!!
     if smooth:
@@ -132,24 +183,27 @@ for itm in itemslist:
 #------!!! check for remove !!!
 
 # ----------------------------------------------------
-
+print('')
 # -------process data---------------------------------------------
 
 if filtr == 1:
+    filtrsignal = None
     for itm in data:
         if itm == 'pet':
             for itm2 in data[itm]:
                 filtrsignal = data[itm][itm2]
-
-    filtrsignal = 100 / filtrsignal
+    if filtrsignal:
+        filtrsignal = 100 / filtrsignal
     for itm in data:
         if itm == 'pet':
             continue
         else:
             #if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms':
                 for itm2 in data[itm]:
-                    data[itm][itm2][330:-1] = data[itm][itm2][330:-1] * filtrsignal[330:-1]
-                    #data[itm][itm2][0:260] = signal.savgol_filter(data[itm][itm2][0:260], 35, 1)
+                    data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
+                    #data[itm][itm2][320:-1] = data[itm][itm2][320:-1] * filtrsignal[320:-1]
+
+
 
 if subrel == 1:
     for itm in data:
@@ -314,7 +368,7 @@ for itm in data:
 if legend == 1:
     legendset1 = []
     for itm in list(data.keys()):
-        if itm == 'RMB30' or itm == 'RME380' or itm == 'RMG180' or itm == 'crude oil':
+        if itm == 'RMB30' or itm == 'RME380' or itm == 'RMG180' or itm == 'crude oil' or itm == 'pet':
             continue
         if itm.find(' 3_days') != -1:
             itm = itm.replace(' 3 days', ' ')
@@ -398,7 +452,7 @@ else:
             ylabel='I, rel. un.',
             title= ' ' + ' ',
             xlim=[xmin,xmax],
-            ylim = [0, ymax1]
+            ylim = [-21.13, ymax1]
             #ylim = [0, 1100]
             )
 
@@ -426,8 +480,8 @@ if dyax == 1:
     for tick in ax2.yaxis.get_majorticklabels():
         tick.set_verticalalignment("bottom")
 
-ax1.axvline(x=345.895,linestyle='--',color='black',ymax=0.85)
-ax1.text(345.9,400,'346', fontsize=24)
+#ax1.axvline(x=345.895,linestyle='--',color='black',ymax=0.85)
+#ax1.text(345.9,400,'346', fontsize=24)
 
 # magic specs -------------------------
 
