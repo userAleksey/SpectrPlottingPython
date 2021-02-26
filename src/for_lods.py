@@ -14,7 +14,8 @@ from sklearn.metrics import r2_score
 import datetime
 # import re
 
-from scipy import signal
+from scipy import signal, stats
+
 
 from somedataproc import managedata, processdata
 
@@ -22,10 +23,10 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = 'On Surface'
+str1 = '0219(Film)'
 str2 = '_0'
 rad_type = 'rad_type'
-day_of_exp = '27_07(LIBS CleanWater_Ground_Shell)'
+day_of_exp = 'films_19-24.02.2021'
 
 xmin = 250
 xmax = 800
@@ -35,7 +36,7 @@ norm_max = 0
 norm_val = 0
 smooth = 0
 backgroundless = 0
-legend = 1
+legend = 0
 lod_legend = 0
 
 dyax = 0
@@ -48,6 +49,9 @@ edits = 0
 select_items = 0
 average = 0
 filtr = 0
+
+y_val_for_sel = None
+y_val2_for_sel = None
 
 datapath = join('..', 'data', day_of_exp, 'for plotting', str1)
 
@@ -153,11 +157,11 @@ for itm in itemslist:
     if getivals:
         ivals[itm] = managedata.getivals(data[itm], wl, idxs)
     if average:
+        data[itm] = managedata.average(data[itm])
         if y_val_for_sel:
             data[itm] = managedata.average(data[itm])
         if y_val2_for_sel:
             data[itm + '_655'] = managedata.average(data[itm + '_655'])
-
 
 #------!!! check for remove !!!
     if smooth:
@@ -189,20 +193,38 @@ if filtr == 1:
             for itm2 in data[itm]:
                 filtrsignal = data[itm][itm2]
 
-    filtrsignal = np.loadtxt(join(datapath, '..', 'TranspLIBSfilter.txt'), dtype=np.str, skiprows=17, usecols=1, comments='>')
-    filtrsignal = np.char.replace(filtrsignal, ',', '.').astype(np.float64)
+    #filtrsignal = np.loadtxt(join(datapath, '..', 'TranspLIBSfilter.txt'), dtype=np.str, skiprows=17, usecols=1, comments='>')
+    #filtrsignal = np.char.replace(filtrsignal, ',', '.').astype(np.float64)
 
-    filtrsignal = 100.000 / filtrsignal
+    #filtrsignal = 100.000 / filtrsignal
     for itm in data:
         if itm == 'TranspLIBSfilter':
             continue
         else:
             #if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms':
                 for itm2 in data[itm]:
-                    #data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
-                    data[itm][itm2][250:-1] = data[itm][itm2][250:-1] * filtrsignal[250:-1]
+                    data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
+                    #data[itm][itm2][250:-1] = data[itm][itm2][250:-1] * filtrsignal[250:-1]
 
 
+z = data[itm][itm2]
+
+Q1 = np.quantile(z,0.25)
+Q3 = np.quantile(z,0.75)
+IQR = Q3 - Q1
+print(IQR)
+
+for count,value in enumerate(z):
+    #print(z[count])
+    if abs(z[count] - z[count - 1]) > 100:
+        z[count] = z[count] - (z[count] - z[count - 1])
+
+fig0, (ax0) = plt.subplots(1, 1, figsize=(19, 11))
+fig0.set_tight_layout(True)
+ax0.plot(wl, data[itm][itm2], linewidth=4)
+
+print((z < (Q1 - 1.5 * IQR))|(z > (Q3 + 1.5 * IQR)))
+#ax0.plot(wl, (z < (Q1 - 1.5 * IQR))|(z > (Q3 + 1.5 * IQR)))
 
 if subrel == 1:
     for itm in data:
