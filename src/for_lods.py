@@ -23,32 +23,36 @@ def func(x, a, b):
     return a*x+b
 
 do_save = 0
-str1 = '0219(Film)'
+str1 = 'for_ml'
 str2 = '_0'
 rad_type = 'rad_type'
 day_of_exp = 'films_19-24.02.2021'
 
-xmin = 250
-xmax = 800
+xmin = 200
+xmax = 1100
 
-getivals = 0
+average = 0
+filtr = 0
+outliers = 1
+normalize = 1
+legend = 1
+
 norm_max = 0
 norm_val = 0
 smooth = 0
 backgroundless = 0
-legend = 0
+
 lod_legend = 0
 
 dyax = 0
 fitting = 0
 something = 0
 subrel = 0
-normalize = 0
 edits = 0
 
 select_items = 0
-average = 0
-filtr = 0
+
+getivals = 0
 
 y_val_for_sel = None
 y_val2_for_sel = None
@@ -61,7 +65,7 @@ if getivals:
     lim2 = 370 #435  # 525 # 335
 
 if norm_val or normalize:
-    nlim1 = 325
+    nlim1 = 225
     nlim2 = 600
 
 font = {'family': 'normal',
@@ -72,13 +76,15 @@ matplotlib.rc('font', **font)
 plt.rcParams["axes.labelweight"] = "bold"
 
 res_dir = join('..', 'results', day_of_exp, str(datetime.date.today()))
-sna = join(res_dir,rad_type + '_' + day_of_exp  + str1 + str2)
+sna = join(res_dir,rad_type + '_' + day_of_exp + str1 + str2)
 
 if not isdir(res_dir):
     makedirs(abspath(res_dir))
 
 # ----------------------------------------------------
 for itm in listdir(datapath):
+    if not isdir(join(datapath,itm)):
+        continue
     for itm2 in listdir(join(datapath,itm)):
         if itm2.endswith(".txt"):
             wl = np.loadtxt(join(datapath, itm, itm2 ), dtype=np.str, usecols=0, skiprows=17, comments='>')
@@ -112,119 +118,123 @@ itemslist = listdir(datapath)
 itemslist.sort()
 itemslist = managedata.natural_sort(itemslist)
 
-for itm in itemslist:
-    if not isdir(join(datapath,itm)):
-        continue
-    if select_items:
-        y_val_for_sel = None
-        y_val2_for_sel = None
-        if itm == 'CleanWater':
-            #y_val_for_sel = 600
-            y_val_for_sel = None
-            y_val2_for_sel = 1400
-        if itm == 'FilmInWater(11_07 500Spectra)':
-            y_val_for_sel = 700
-            y_val2_for_sel = 1100
-        if itm == 'Ground':
-            #y_val_for_sel = 200
-            y_val_for_sel = None
-            y_val2_for_sel = 600
-        if itm == 'Shell':
-            y_val_for_sel = 400
-            y_val2_for_sel = None
-        if itm == 'CleanWater' and str1 == 'On Surface':
-            y_val_for_sel = 15000
-            y_val2_for_sel = None
-        if itm == 'Film14_07SurfaceOneCascade':
-            y_val_for_sel = 15000
-            y_val2_for_sel = None
-        if itm == 'FilmOnSurface(11_07)OneCascade':
-            y_val_for_sel = 6000
-            y_val2_for_sel = None
-        if itm == 'Ground' and str1 == 'On Surface':
-            y_val_for_sel = 5000
-            y_val2_for_sel = None
-        if itm == 'Shell' and str1 == 'On Surface':
-            y_val_for_sel = 4000
-            y_val2_for_sel = None
-        if y_val2_for_sel:
-            data[itm + '_655'] = managedata.load_data_with_sel(join(datapath, itm), y_val2_for_sel)
-        if y_val_for_sel:
-            data[itm] = managedata.load_data_with_sel(join(datapath, itm), y_val_for_sel)
-    else:
+datafilepath = join(datapath, 'data.npy')
+if isfile(datafilepath):
+    data2 = np.load(datafilepath, allow_pickle=True)
+    data = data2.item()
+else:
+    for itm in itemslist:
+        if not isdir(join(datapath,itm)):
+            continue
         data[itm] = managedata.load_data(join(datapath, itm))
+    np.save(datafilepath, data)
 
-    if getivals:
-        ivals[itm] = managedata.getivals(data[itm], wl, idxs)
-    if average:
-        data[itm] = managedata.average(data[itm])
-        if y_val_for_sel:
-            data[itm] = managedata.average(data[itm])
-        if y_val2_for_sel:
-            data[itm + '_655'] = managedata.average(data[itm + '_655'])
+if select_items:
+    y_val_for_sel = None
+    y_val2_for_sel = None
+    if itm == 'CleanWater':
+        #y_val_for_sel = 600
+        y_val_for_sel = None
+        y_val2_for_sel = 1400
+    if itm == 'FilmInWater(11_07 500Spectra)':
+        y_val_for_sel = 700
+        y_val2_for_sel = 1100
+    if itm == 'Ground':
+        #y_val_for_sel = 200
+        y_val_for_sel = None
+        y_val2_for_sel = 600
+    if itm == 'Shell':
+        y_val_for_sel = 400
+        y_val2_for_sel = None
+    if itm == 'CleanWater' and str1 == 'On Surface':
+        y_val_for_sel = 15000
+        y_val2_for_sel = None
+    if itm == 'Film14_07SurfaceOneCascade':
+        y_val_for_sel = 15000
+        y_val2_for_sel = None
+    if itm == 'FilmOnSurface(11_07)OneCascade':
+        y_val_for_sel = 6000
+        y_val2_for_sel = None
+    if itm == 'Ground' and str1 == 'On Surface':
+        y_val_for_sel = 5000
+        y_val2_for_sel = None
+    if itm == 'Shell' and str1 == 'On Surface':
+        y_val_for_sel = 4000
+        y_val2_for_sel = None
+    if y_val2_for_sel:
+        data[itm + '_655'] = managedata.load_data_with_sel(join(datapath, itm), y_val2_for_sel)
+    if y_val_for_sel:
+        data[itm] = managedata.load_data_with_sel(join(datapath, itm), y_val_for_sel)
+
+if getivals:
+    ivals[itm] = managedata.getivals(data[itm], wl, idxs)
+
+if average:
+    #data[itm] = managedata.average(data[itm])
+    #if y_val_for_sel:
+    #    data[itm] = managedata.average(data[itm])
+    #if y_val2_for_sel:
+    #    data[itm + '_655'] = managedata.average(data[itm + '_655'])
+
+    for itm1 in data:
+        data[itm1] = managedata.average(data[itm1])
+
 
 #------!!! check for remove !!!
-    if smooth:
-        if itm == 'RMB30 80 mcm':
-            data[itm] = managedata.smooth(data[itm])
-            for itm2 in data[itm]:
-                data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
-        if itm == 'RMB30 slick (80 mcm)':
-            data[itm] = managedata.smooth(data[itm])
-            for itm2 in data[itm]:
-                data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
-        if itm == 'DMA' and str1 == 'fig_12' and day_of_exp == 'statiyav2':
-            for itm2 in data[itm]:
-                data[itm][itm2][0:-1] = data[itm][itm2][0:-1]*0.1
-    if norm_max:
-        data[itm] = managedata.norm_max(data[itm])
-    if norm_val:
-        data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
+if smooth:
+    if itm == 'RMB30 80 mcm':
+        data[itm] = managedata.smooth(data[itm])
+        for itm2 in data[itm]:
+            data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
+    if itm == 'RMB30 slick (80 mcm)':
+        data[itm] = managedata.smooth(data[itm])
+        for itm2 in data[itm]:
+            data[itm][itm2][0:250] = data[itm][itm2][0:250]*0.5
+    if itm == 'DMA' and str1 == 'fig_12' and day_of_exp == 'statiyav2':
+        for itm2 in data[itm]:
+            data[itm][itm2][0:-1] = data[itm][itm2][0:-1]*0.1
+if norm_max:
+    data[itm] = managedata.norm_max(data[itm])
+if norm_val:
+    data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
 #------!!! check for remove !!!
 
 # ----------------------------------------------------
 
 # -------process data---------------------------------------------
 
+if outliers:
+    for itm1 in data:
+        #if itm1 != 'DMA_slick':
+        #    continue
+        for itm2 in data[itm1]:
+            for count, value in enumerate(data[itm1][itm2]):
+                if abs(data[itm1][itm2][count] - data[itm1][itm2][count - 1]) > 250:
+                    data[itm1][itm2][count] = data[itm1][itm2][count - 2]
+                    print(count)
+            print(itm2)
+
+
 if filtr == 1:
     filtrsignal = None
+    filtr_name = 'Filter_Pet'
     for itm in data:
-        if itm == 'TranspLIBSfilter':
+        if itm == filtr_name:
             for itm2 in data[itm]:
                 filtrsignal = data[itm][itm2]
 
-    #filtrsignal = np.loadtxt(join(datapath, '..', 'TranspLIBSfilter.txt'), dtype=np.str, skiprows=17, usecols=1, comments='>')
-    #filtrsignal = np.char.replace(filtrsignal, ',', '.').astype(np.float64)
-
-    #filtrsignal = 100.000 / filtrsignal
+    filtrsignal = np.loadtxt(join(datapath, '..', filtr_name + '.txt'), dtype=np.str, skiprows=17, usecols=1, comments='>')
+    filtrsignal = np.char.replace(filtrsignal, ',', '.').astype(np.float64)
+    filtrsignal = 100.000 / filtrsignal
     for itm in data:
-        if itm == 'TranspLIBSfilter':
+        if itm == filtr_name:
             continue
         else:
-            #if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms':
+            if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms' or itm == 'DMA_slick':
                 for itm2 in data[itm]:
-                    data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
-                    #data[itm][itm2][250:-1] = data[itm][itm2][250:-1] * filtrsignal[250:-1]
-
-
-z = data[itm][itm2]
-
-Q1 = np.quantile(z,0.25)
-Q3 = np.quantile(z,0.75)
-IQR = Q3 - Q1
-print(IQR)
-
-for count,value in enumerate(z):
-    #print(z[count])
-    if abs(z[count] - z[count - 1]) > 100:
-        z[count] = z[count] - (z[count] - z[count - 1])
-
-fig0, (ax0) = plt.subplots(1, 1, figsize=(19, 11))
-fig0.set_tight_layout(True)
-ax0.plot(wl, data[itm][itm2], linewidth=4)
-
-print((z < (Q1 - 1.5 * IQR))|(z > (Q3 + 1.5 * IQR)))
-#ax0.plot(wl, (z < (Q1 - 1.5 * IQR))|(z > (Q3 + 1.5 * IQR)))
+                    #data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
+                    data[itm][itm2][300:-1] = data[itm][itm2][300:-1] * filtrsignal[300:-1]
+                    #data[itm][itm2] = data[itm][itm2] * filtrsignal
 
 if subrel == 1:
     for itm in data:
@@ -293,6 +303,11 @@ if normalize == 1:
         if itm == 'seawater' or itm == 'RMB30 (80 mcm)':
             continue
         data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
+
+datafilepath1 = join(datapath, 'data1.npy')
+np.save(datafilepath1, data['DMA'])
+test1 = np.load(datafilepath1, allow_pickle=True)
+test2 = test1.item()
 
 if edits == 1:
     ### NEED finish
@@ -401,7 +416,7 @@ if legend == 1:
         else:
             legendset1.append(itm)
 
-    ax1.legend(legendset1, loc=2,fancybox=True, facecolor='white', frameon=False)
+    ax1.legend(legendset1, loc=0,fancybox=True, facecolor='white', frameon=False)
 
 if dyax == 1:
     for itm in data:
@@ -464,7 +479,7 @@ if norm_val == 1 or norm_max == 1 or normalize:
 else:
     allymax = []
     for itm1 in data:
-        if itm1 == 'DMA' or itm1 == 'seawater' or itm1 == 'seawater20' or itm1 == 'SeaWater':
+        if itm1 == '_DMA' or itm1 == 'seawater' or itm1 == 'seawater20' or itm1 == 'SeaWater':
             continue
         for itm2 in data[itm1]:
             allymax.append(max(data[itm1][itm2][xlims_idxs[0]:xlims_idxs[-1]]))
