@@ -304,10 +304,18 @@ if normalize == 1:
             continue
         data[itm] = managedata.norm_val(data[itm], wl, n_idxs)
 
+
+
+#for itm in data:
+#    datatxtpath = join(datapath, itm + '.txt')
+#    test_dma = data.get(itm).values()
+#    np.savetxt(datatxtpath, np.array(list(test_dma)))
+
 datafilepath1 = join(datapath, 'data1.npy')
-np.save(datafilepath1, data['DMA'])
-test1 = np.load(datafilepath1, allow_pickle=True)
-test2 = test1.item()
+np.save(datafilepath1, data)
+
+#test1 = np.load(datafilepath1, allow_pickle=True)
+#test2 = test1.item()
 
 if edits == 1:
     ### NEED finish
