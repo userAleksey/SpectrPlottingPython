@@ -205,8 +205,8 @@ if norm_val:
 
 if outliers:
     for itm1 in data:
-        #if itm1 != 'DMA_slick':
-        #    continue
+        if itm1 != 'DMA_slick':
+            continue
         for itm2 in data[itm1]:
             for count, value in enumerate(data[itm1][itm2]):
                 if abs(data[itm1][itm2][count] - data[itm1][itm2][count - 1]) > 250:
@@ -233,7 +233,7 @@ if filtr == 1:
             if itm == '1 day (500 mcm)' or itm == 'DystillatePET300ms' or itm == 'DMA_slick':
                 for itm2 in data[itm]:
                     #data[itm][itm2] = signal.savgol_filter(data[itm][itm2], 5, 1)
-                    data[itm][itm2][300:-1] = data[itm][itm2][300:-1] * filtrsignal[300:-1]
+                    data[itm][itm2][265:-1] = data[itm][itm2][265:-1] * filtrsignal[265:-1]
                     #data[itm][itm2] = data[itm][itm2] * filtrsignal
 
 if subrel == 1:
