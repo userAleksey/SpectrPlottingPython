@@ -209,7 +209,7 @@ if outliers:
         #    continue
         for itm2 in data[itm1]:
             for count, value in enumerate(data[itm1][itm2]):
-                if abs(data[itm1][itm2][count] - data[itm1][itm2][count - 1]) > 200:
+                if abs(data[itm1][itm2][count] - data[itm1][itm2][count - 1]) > 250:
                     data[itm1][itm2][count] = data[itm1][itm2][count - 2]
                     print(count)
             print(itm2)
