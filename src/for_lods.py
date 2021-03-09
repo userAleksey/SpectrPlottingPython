@@ -87,7 +87,7 @@ for itm in listdir(datapath):
         continue
     for itm2 in listdir(join(datapath,itm)):
         if itm2.endswith(".txt"):
-            wl = np.loadtxt(join(datapath, itm, itm2 ), dtype=np.str, usecols=0, skiprows=17, comments='>')
+            wl = np.loadtxt(join(datapath, itm, itm2 ), dtype=np.str, usecols=0, skiprows=14, comments='>')
             break
         if itm2.endswith(".tif") or itm2.endswith(".tiff"):
             wl = np.loadtxt(join(datapath, '..', 'wavelengths'), dtype=np.str, usecols=0, comments='>')
@@ -205,11 +205,11 @@ if norm_val:
 
 if outliers:
     for itm1 in data:
-        if itm1 != 'DMA_slick':
-            continue
+        #if itm1 != 'DMA_slick':
+        #    continue
         for itm2 in data[itm1]:
             for count, value in enumerate(data[itm1][itm2]):
-                if abs(data[itm1][itm2][count] - data[itm1][itm2][count - 1]) > 250:
+                if abs(data[itm1][itm2][count] - data[itm1][itm2][count - 1]) > 200:
                     data[itm1][itm2][count] = data[itm1][itm2][count - 2]
                     print(count)
             print(itm2)
