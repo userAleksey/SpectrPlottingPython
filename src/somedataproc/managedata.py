@@ -15,7 +15,7 @@ def load_data (datapath):
     #for itm in natural_sort(listdir(datapath)):
     for itm in listdir(datapath):
         if itm.endswith(".txt"):
-            Data[itm] = np.loadtxt(join(datapath, itm), dtype=np.str, skiprows=17, usecols=1, comments='>')
+            Data[itm] = np.loadtxt(join(datapath, itm), dtype=np.str, skiprows=14, usecols=1, comments='>')
             Data[itm] = np.char.replace(Data[itm], ',', '.').astype(np.float64)
         if itm.endswith(".tif"):
             Data[itm] = np.sum(np.array(Image.open(join(datapath, itm)), dtype='float64')/65536.,0)
@@ -73,6 +73,5 @@ def smooth (data):
 # def backgroundless (Data, first, last):
 #     for itm in Data:
 #         Data[itm] = Data[itm] - np.mean(Data[itm][first:last])
-
 
 
